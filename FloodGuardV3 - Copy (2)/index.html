@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="./css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-    /* pare tin ya problema footer ni */
     .footer {
     background: rgba(30, 58, 138, 0.95);
     backdrop-filter: blur(20px);
@@ -81,6 +80,33 @@
     text-align: center;
     color: rgba(255, 255, 255, 0.7);
     font-size: 0.9rem;
+}
+
+.section-divider {
+    border: none;
+    height: 1px;
+    background: rgba(0, 0, 0, 0.1);
+    margin: 40px 0;
+}
+
+.profile-dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 60px;
+    right: 0;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    min-width: 220px;
+    z-index: 1000;
+}
+
+.profile-dropdown-container {
+    position: relative;
+}
+
+.profile-dropdown-container.active .profile-dropdown-menu {
+    display: block;
 }
 
     </style>
@@ -180,24 +206,8 @@
             </div>
         </section>
 
-        <div class="dashboard-content">
-            <section class="dashboard-grid">
-                <div class="dashboard-card latest-alert-card warning">
-                    <div class="card-header">
-                        <span class="card-icon">🚨</span>
-                        <h3 class="card-title">Latest Alert</h3>
-                        <div class="notification-badge-container">
-                            <i class="fas fa-bell notification-icon"></i>
-                            <span class="notification-badge">5</span>
-                        </div>
-                    </div>
-                    <div class="card-content">
-                        <h4 class="alert-type">Warning: Water Levels Rising</h4>
-                        <p class="alert-message">Water levels at the Riverside Sensor (S1) are approaching critical levels. Please exercise caution.</p>
-                        <span class="alert-timestamp">Issued 5 minutes ago</span>
-                    </div>
-                    <a href="./alert.html" class="card-link">View All Alerts →</a>
-                </div>
+        <hr class="section-divider">
+
                 
                 <div class="dashboard-card flood-data-card">
                     <div class="card-header">
@@ -237,27 +247,6 @@
                     <a href="./monitoring.html" class="card-link">View Detailed Monitoring →</a>
                 </div>
 
-                <div class="dashboard-card quick-links-card">
-                    <div class="card-header">
-                        <span class="card-icon">🔗</span>
-                        <h3 class="card-title">Emergency Preparedness Hub</h3>
-                    </div>
-                    <div class="card-content">
-                        <ul class="link-list">
-                <div class="dashboard-card quick-links-card">
-                    <div class="card-header">
-                        <span class="card-icon">🔗</span>
-                        <h3 class="card-title">Emergency Preparedness Hub</h3>
-                    </div>
-                    <div class="card-content">
-                        <ul class="link-list">
-                            <li><a href="#"><i class="fas fa-route icon-link"></i><span>Evacuation Routes & Safe Zones</span></a></li>
-                            <li><a href="#"><i class="fas fa-phone-volume icon-link"></i><span>Barangay Emergency Contacts</span></a></li>
-                            <li><a href="#"><i class="fas fa-clipboard-list icon-link"></i><span>Personal Flood Safety Checklist</span></a></li>
-                            <li><a href="#"><i class="fas fa-users-cog icon-link"></i><span>Volunteer & Community Support</span></a></li>
-                        </ul>
-                    </div>
-                </div>
             </section>
 
             <hr>
@@ -365,65 +354,6 @@
             </section>
 
             <hr>
-
-            <section class="community-messages-section">
-                <!-- Section Header -->
-                <div class="card-header">
-                  <span class="card-icon">🗣️</span>
-                  <h3 class="card-title">Community Flood Reports</h3>
-                </div>
-              
-                <!-- Community Messages -->
-                <div class="message-list" id="messageList">
-                  <!-- Sample Report -->
-                  <div class="message-card status-high">
-                    <div class="message-header">
-                      <span class="message-sender">
-                        <img src="./design/images/nesto.png" alt="profile photo" class="profile-photo-small">
-                        Ernest L.
-                      </span>
-                      <span class="message-location">📍 Zone 5, Near Market</span>
-                    </div>
-                    <p class="message-content">
-                      The street is already flooded with knee-deep water. We need assistance for evacuation, especially for our elderly neighbors. Rain is still very heavy.
-                    </p>
-                    <div class="message-status high">High Severity</div>
-                    <p class="message-timestamp">Reported 12 minutes ago</p>
-                  </div>
-                </div>
-              
-                <!-- Add Comment Form -->
-                <div class="report-form-container">
-                  <h4>📢 Submit a Flood Report</h4>
-                  <form id="reportForm" class="report-form">
-                    <!-- Description -->
-                    <div class="form-group">
-                      <label for="description">Report Description</label>
-                      <textarea id="description" name="description" placeholder="Describe the situation..." required></textarea>
-                    </div>
-              
-                    <!-- Location -->
-                    <div class="form-group">
-                      <label for="location">Location</label>
-                      <input type="text" id="location" name="location" placeholder="e.g., Zone 3, Near School" required>
-                    </div>
-              
-                    <!-- Severity Level -->
-                    <div class="form-group">
-                      <label for="severity">Severity Level</label>
-                      <select id="severity" name="severity" required>
-                        <option value="" disabled selected>Select Severity</option>
-                        <option value="yellow">⚠ Yellow - Low Risk</option>
-                        <option value="orange">⚠⚠ Orange - Moderate Risk</option>
-                        <option value="red">⚠⚠⚠ Red - High Risk</option>
-                      </select>
-                    </div>
-              
-                    <!-- Submit Button -->
-                    <button type="submit" class="submit-btn">Submit Report</button>
-                  </form>
-                </div>
-              </section>              
               
         <div id="ratingModal" class="modal">
             <div class="modal-content">

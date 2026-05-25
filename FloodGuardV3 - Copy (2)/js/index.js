@@ -422,18 +422,15 @@ document.getElementById('reportForm').addEventListener('submit', function (e) {
                 form.reset();
             }
             
-            // Logout function
-            function logout() {
-                if (confirm('Are you sure you want to logout from FloodGuard?')) {
-                    document.body.style.transition = 'opacity 0.5s ease';
-                    document.body.style.opacity = '0';
-                    
-                    setTimeout(() => {
-                        alert('Logout successful! Redirecting to login page...');
-                        location.reload();
-                    }, 500);
-                }
+        // Logout function
+        async function logout() {
+            if (confirm('Are you sure you want to logout from FloodGuard?')) {
+                document.body.style.transition = 'opacity 0.5s ease';
+                document.body.style.opacity = '0';
+                const { logOut } = await import('./auth.js');
+                await logOut();
             }
+        }
     
             // Carousel pause on hover functionality
             const carouselSlides = document.querySelector('.carousel-slides');

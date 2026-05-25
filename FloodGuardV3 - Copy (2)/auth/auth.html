@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FloodGuard - Monitor, Predict, Protect</title>
-    <link rel="stylesheet" href="/css/styleshet.css">
+    <link rel="stylesheet" href="../css/styleshet.css">
 </head>
 <body>
     <div class="container">
@@ -13,37 +13,39 @@
         <img src="/design/images/logo.png" alt="FloodGuard Logo" class="logo-img">
         
         <div class="form-container">
-            <form class="form active" id="loginForm">
+            <form class="form active" id="login-form">
                 <h2 class="form-title">Welcome Back</h2>
                 <div class="form-group">
-                    <label for="loginEmail">Email Address</label>
-                    <input type="email" id="loginEmail" name="email" required>
+                    <label for="login-email">Email Address</label>
+                    <input type="email" id="login-email" name="email" required>
                 </div>
                 <div class="form-group">
-                    <label for="loginPassword">Password</label>
-                    <input type="password" id="loginPassword" name="password" required>
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" name="password" required>
                 </div>
+                <div id="login-error" style="display:none; color:red; font-size:0.9rem;"></div>
                 <button type="submit" class="submit-btn">Sign In</button>
             </form>
 
-            <form class="form" id="registerForm">
+            <form class="form" id="signup-form">
                 <h2 class="form-title">Create Account</h2>
                 <div class="form-group">
-                    <label for="registerName">Full Name</label>
-                    <input type="text" id="registerName" name="name" required>
+                    <label for="signup-name">Full Name</label>
+                    <input type="text" id="signup-name" name="name" required>
                 </div>
                 <div class="form-group">
-                    <label for="registerEmail">Email Address</label>
-                    <input type="email" id="registerEmail" name="email" required>
+                    <label for="signup-email">Email Address</label>
+                    <input type="email" id="signup-email" name="email" required>
                 </div>
                 <div class="form-group">
-                    <label for="registerPassword">Password</label>
-                    <input type="password" id="registerPassword" name="password" required>
+                    <label for="signup-password">Password</label>
+                    <input type="password" id="signup-password" name="password" required>
                 </div>
                 <div class="form-group">
                     <label for="confirmPassword">Confirm Password</label>
                     <input type="password" id="confirmPassword" name="confirmPassword" required>
                 </div>
+                <div id="signup-error" style="display:none; color:red; font-size:0.9rem;"></div>
                 <button type="submit" class="submit-btn">Create Account</button>
             </form>
         </div>
@@ -107,7 +109,7 @@
             </div>
         </div>
     </div>
-    
-    <script src="/js/auth.js"></script>
+
+    <script type="module" src="/js/auth.js"></script>
 </body>
 </html>

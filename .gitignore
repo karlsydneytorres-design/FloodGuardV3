@@ -71,8 +71,16 @@ node_modules/
 # PROJECT-SPECIFIC SENSITIVE FILES
 # ==========================================
 
-# Firebase configuration (contains API keys)
-js/firebase-config.js
+# Root level Firebase sensitive files
+.firebaserc
+firestore.rules
+database.rules.json
+
+# Inside folder Firebase sensitive files
+FloodGuardV3 - Copy (2)/.firebaserc
+FloodGuardV3 - Copy (2)/firestore.rules
+FloodGuardV3 - Copy (2)/database.rules.json
+FloodGuardV3 - Copy (2)/js/firebase-config.js
 
 # macOS system files
 .DS_Store

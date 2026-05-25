@@ -1,19 +1,16 @@
 // ============================================================
 //  js/admin.js
-//  Admin panel: manage users & sensors via Firestore
-//  Only accessible if user.role === "admin" in Firestore
 // ============================================================
 
 import {
     collection, getDocs, doc, updateDoc,
-    deleteDoc, query, orderBy, serverTimestamp
-  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    deleteDoc, query, orderBy
+  } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
   
-  import { db } from "./firebase-config.js";
-  import { requireAuth } from "./auth.js";
-  import { getUserProfile } from "./profile.js";
+  import { db } from "/js/firebase-config.js";
+  import { requireAuth } from "/js/auth.js";
+  import { getUserProfile } from "/js/profile.js";
   
-  // ── Admin Guard ────────────────────────────────────────────
   async function requireAdmin(callback) {
     requireAuth(async (user) => {
       const profile = await getUserProfile(user.uid);
@@ -30,35 +27,29 @@ import {
     });
   }
   
-  // ── Fetch all users ────────────────────────────────────────
   export async function getAllUsers() {
-    const q         = query(collection(db, "users"), orderBy("createdAt", "desc"));
-    const snapshot  = await getDocs(q);
+    const q = query(collection(db, "users"), orderBy("createdAt", "desc"));
+    const snapshot = await getDocs(q);
     return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
   }
   
-  // ── Update user role ───────────────────────────────────────
   export async function setUserRole(uid, role) {
     await updateDoc(doc(db, "users", uid), { role });
   }
   
-  // ── Delete user document from Firestore ───────────────────
   export async function deleteUserRecord(uid) {
     await deleteDoc(doc(db, "users", uid));
   }
   
-  // ── Fetch all sensor configs from Firestore ───────────────
   export async function getAllSensorConfigs() {
     const snapshot = await getDocs(collection(db, "sensorConfigs"));
     return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
   }
   
-  // ── Page Init ──────────────────────────────────────────────
   document.addEventListener("DOMContentLoaded", () => {
     requireAdmin(async (user, profile) => {
       console.log("Admin panel — logged in as:", user.email);
   
-      // ── Render users table ─────────────────────────────────
       const usersTableBody = document.getElementById("users-tbody");
       if (usersTableBody) {
         const users = await getAllUsers();
@@ -79,14 +70,12 @@ import {
           </tr>
         `).join("");
   
-        // Role change
         usersTableBody.querySelectorAll(".role-select").forEach(select => {
           select.addEventListener("change", async () => {
             await setUserRole(select.dataset.uid, select.value);
           });
         });
   
-        // Delete user record
         usersTableBody.querySelectorAll(".btn-delete").forEach(btn => {
           btn.addEventListener("click", async () => {
             if (confirm("Remove this user's record from Firestore?")) {
@@ -97,7 +86,6 @@ import {
         });
       }
   
-      // ── Render sensor configs ──────────────────────────────
       const sensorList = document.getElementById("sensor-configs-list");
       if (sensorList) {
         const configs = await getAllSensorConfigs();

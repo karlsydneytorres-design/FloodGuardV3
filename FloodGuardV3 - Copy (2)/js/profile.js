@@ -1,3 +1,16 @@
+// ============================================================
+//  js/profile.js
+// ============================================================
+
+import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+import { db } from "/js/firebase-config.js";
+
+// ── Get user profile from Firestore ───────────────────────
+export async function getUserProfile(uid) {
+  const docSnap = await getDoc(doc(db, "users", uid));
+  return docSnap.exists() ? docSnap.data() : null;
+}
+
 // Profile dropdown functionality
 const profileDropdown = document.querySelector('.profile-dropdown-container');
 const dropdownMenu = document.querySelector('.profile-dropdown-menu');
@@ -63,47 +76,13 @@ function changePassword() {
     document.getElementById('confirmPassword').value = '';
 }
 
-// Reset form to original values
 function resetForm() {
     if (confirm('Are you sure you want to reset all changes? This will restore the original values.')) {
         const profileForm = document.getElementById('profileForm');
         if (profileForm) profileForm.reset();
-
-        const defaults = {
-            firstName: 'Ernest',
-            lastName: 'Lazatin',
-            middleName: 'Santos',
-            email: 'ernest.lazatin@example.com',
-            phone: '+63 917 123 4567',
-            streetAddress: '123 Sampaguita Street',
-            barangay: 'Colgante',
-            municipality: 'Apalit',
-            province: 'Pampanga',
-            zipCode: '2016',
-            bio: 'Dedicated community leader serving Barangay Colgante for over 10 years. Committed to ensuring the safety and welfare of all residents through effective flood monitoring and emergency response coordination.',
-            displayName: 'Ernest Lazatin'
-        };
-
-        Object.entries(defaults).forEach(([id, value]) => {
-            const element = document.getElementById(id);
-            if (element) element.value = value;
-        });
-
-        const displayName = document.getElementById('displayName');
-        if (displayName) displayName.textContent = defaults.displayName;
-
-        ['currentPassword', 'newPassword', 'confirmPassword'].forEach(id => {
-            const field = document.getElementById(id);
-            if (field) field.value = '';
-        });
-
-        document.querySelectorAll('input, select, textarea').forEach(input => {
-            input.style.borderColor = '#e5e7eb';
-        });
     }
 }
 
-// Photo upload functionality
 function uploadPhoto() {
     const photoInput = document.getElementById('photoInput');
     if (photoInput) photoInput.click();
@@ -120,14 +99,20 @@ function previewPhoto(input) {
     }
 }
 
-// Logout function
 function logout() {
     if (confirm('Are you sure you want to logout? Any unsaved changes will be lost.')) {
-        window.location.href = 'index.html';
+        window.location.href = '/auth/auth.html';
     }
 }
 
-// Real-time validation
+// Make functions global so onclick attributes work
+window.saveProfile = saveProfile;
+window.changePassword = changePassword;
+window.resetForm = resetForm;
+window.uploadPhoto = uploadPhoto;
+window.previewPhoto = previewPhoto;
+window.logout = logout;
+
 document.addEventListener('DOMContentLoaded', function() {
     const emailField = document.getElementById('email');
     if (emailField) {
@@ -167,24 +152,7 @@ document.addEventListener('DOMContentLoaded', function() {
             this.style.borderColor = (this.value && newPassword !== this.value) ? '#ef4444' : ((this.value && newPassword === this.value) ? '#10b981' : '#e5e7eb');
         });
     }
-
-    let saveTimeout;
-    document.querySelectorAll('input, select, textarea').forEach(input => {
-        if (input.type !== 'password' && input.type !== 'file') {
-            input.addEventListener('input', function() {
-                clearTimeout(saveTimeout);
-                saveTimeout = setTimeout(() => {
-                    console.log('Auto-saving changes...');
-                }, 2000);
-            });
-        }
-    });
 });
-
-function toggleMobileMenu() {
-    const navMenu = document.querySelector('.nav-menu');
-    if (navMenu) navMenu.classList.toggle('mobile-active');
-}
 
 let formChanged = false;
 const profileForm = document.getElementById('profileForm');

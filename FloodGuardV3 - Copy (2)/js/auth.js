@@ -1,6 +1,5 @@
 // ============================================================
 //  js/auth.js
-//  Handles: Sign Up, Log In, Log Out, Auth State Guard
 // ============================================================
 
 import {
@@ -14,12 +13,16 @@ import {
   import { doc, setDoc, serverTimestamp }
     from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
   
-import { auth, db } from "/js/firebase-config.js";
+  import { auth, db } from "/js/firebase-config.js";
   
-  // ── Helpers ────────────────────────────────────────────────
   function showError(elementId, message) {
     const el = document.getElementById(elementId);
-    if (el) { el.textContent = message; el.style.display = "block"; }
+    if (el) { el.textContent = message; el.style.display = "block"; el.style.color = "red"; }
+  }
+
+  function showSuccess(elementId, message) {
+    const el = document.getElementById(elementId);
+    if (el) { el.textContent = message; el.style.display = "block"; el.style.color = "green"; }
   }
   
   function clearError(elementId) {
@@ -27,12 +30,17 @@ import { auth, db } from "/js/firebase-config.js";
     if (el) { el.textContent = ""; el.style.display = "none"; }
   }
   
-  // ── Sign Up ────────────────────────────────────────────────
   export async function signUp(email, password, displayName) {
     try {
+      console.log("1. Starting signup...");
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
+      console.log("2. Auth user created:", user.uid);
+      
       await updateProfile(user, { displayName });
+      console.log("3. Profile updated");
+      
+      console.log("4. Attempting Firestore write... db:", db);
       await setDoc(doc(db, "users", user.uid), {
         uid:         user.uid,
         displayName,
@@ -40,13 +48,21 @@ import { auth, db } from "/js/firebase-config.js";
         role:        "user",
         createdAt:   serverTimestamp()
       });
+      console.log("5. Firestore write SUCCESS!");
+
+      // Sign out immediately so the user logs in manually
+      await signOut(auth);
+      console.log("6. Signed out after registration — user must log in manually.");
+      
       return { success: true, user };
     } catch (error) {
+      console.error("ERROR CODE:", error.code);
+      console.error("ERROR MESSAGE:", error.message);
+      console.error("FULL ERROR:", error);
       return { success: false, error: getFriendlyError(error.code) };
     }
   }
   
-  // ── Log In ─────────────────────────────────────────────────
   export async function logIn(email, password) {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -56,7 +72,6 @@ import { auth, db } from "/js/firebase-config.js";
     }
   }
   
-  // ── Log Out ────────────────────────────────────────────────
   export async function logOut() {
     try {
       await signOut(auth);
@@ -66,7 +81,6 @@ import { auth, db } from "/js/firebase-config.js";
     }
   }
   
-  // ── Auth State Guard ───────────────────────────────────────
   export function requireAuth(callback) {
     onAuthStateChanged(auth, (user) => {
       if (!user) {
@@ -79,11 +93,10 @@ import { auth, db } from "/js/firebase-config.js";
   
   export function redirectIfLoggedIn(redirectTo = "/index.html") {
     onAuthStateChanged(auth, (user) => {
-      if (user) window.location.href = redirectTo;
+      if (user && !window._isRegistering) window.location.href = redirectTo;
     });
   }
   
-  // ── Friendly Error Messages ────────────────────────────────
   function getFriendlyError(code) {
     const messages = {
       "auth/email-already-in-use":   "This email is already registered.",
@@ -98,7 +111,6 @@ import { auth, db } from "/js/firebase-config.js";
     return messages[code] || "Something went wrong. Please try again.";
   }
   
-  // ── Wire up auth.html ──────────────────────────────────────
   document.addEventListener("DOMContentLoaded", () => {
     redirectIfLoggedIn("/index.html");
 
@@ -107,7 +119,6 @@ import { auth, db } from "/js/firebase-config.js";
     const toggleBtn  = document.getElementById("toggleBtn");
     const toggleText = document.getElementById("toggleText");
   
-    // ── Toggle between Login and Register ──
     if (toggleBtn) {
       toggleBtn.addEventListener("click", () => {
         const isLoginActive = loginForm.classList.contains("active");
@@ -125,7 +136,6 @@ import { auth, db } from "/js/firebase-config.js";
       });
     }
   
-    // ── Terms Modal ────────────────────────────────────────
     const termsModal     = document.getElementById("termsModal");
     const acceptCheckbox = document.getElementById("acceptTerms");
     const acceptBtn      = document.getElementById("acceptTermsBtn");
@@ -141,7 +151,7 @@ import { auth, db } from "/js/firebase-config.js";
   
     if (cancelBtn) {
       cancelBtn.addEventListener("click", () => {
-        termsModal.classList.remove("active"); // ← fixed
+        termsModal.classList.remove("active");
         pendingRegistration = null;
         acceptCheckbox.checked = false;
         acceptBtn.disabled = true;
@@ -151,27 +161,48 @@ import { auth, db } from "/js/firebase-config.js";
     if (acceptBtn) {
       acceptBtn.addEventListener("click", async () => {
         if (!pendingRegistration) return;
-        termsModal.classList.remove("active"); // ← fixed
+        console.log("Accept button clicked, pendingRegistration:", pendingRegistration);
+        termsModal.classList.remove("active");
         acceptCheckbox.checked = false;
         acceptBtn.disabled = true;
   
         const { name, email, password, btn } = pendingRegistration;
         btn.disabled = true;
         btn.textContent = "Creating account…";
-  
+
+        window._isRegistering = true; // 🔒 block redirect during registration
         const result = await signUp(email, password, name);
+        window._isRegistering = false; // 🔓 unblock after done
+        console.log("signUp result:", result);
+
         if (result.success) {
-          window.location.href = "/index.html";
+          // ✅ Show success message — NO redirect
+          signupForm.reset();
+          showSuccess("signup-error", "✅ Account created successfully! Please sign in.");
+
+          // Switch back to login form after a short delay
+          setTimeout(() => {
+            clearError("signup-error");
+            signupForm.classList.remove("active");
+            loginForm.classList.add("active");
+            toggleText.textContent = "Don't have an account?";
+            toggleBtn.textContent  = "Create Account";
+
+            // Pre-fill the email in the login form for convenience
+            const loginEmailInput = document.getElementById("login-email");
+            if (loginEmailInput) loginEmailInput.value = email;
+          }, 2000);
+
         } else {
           showError("signup-error", result.error);
-          btn.disabled = false;
-          btn.textContent = "Create Account";
         }
+
+        btn.disabled = false;
+        btn.textContent = "Create Account";
         pendingRegistration = null;
       });
     }
   
-    // ── Login Form Submit ──────────────────────────────────
     if (loginForm) {
       loginForm.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -193,7 +224,6 @@ import { auth, db } from "/js/firebase-config.js";
       });
     }
   
-    // ── Signup Form Submit → Show Terms Modal ──────────────
     if (signupForm) {
       signupForm.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -216,7 +246,7 @@ import { auth, db } from "/js/firebase-config.js";
         }
   
         pendingRegistration = { name, email, password, btn };
-        termsModal.classList.add("active"); 
+        termsModal.classList.add("active");
       });
     }
   

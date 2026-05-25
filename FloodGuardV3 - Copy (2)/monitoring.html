@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FloodGuard - Advanced Monitoring System</title>
+    <link rel="stylesheet" href="./css/stylesheet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        /* pare tin ya problema footer ni */
+.footer {
+    background: rgba(30, 58, 138, 0.95);
+    backdrop-filter: blur(20px);
+    color: white;
+    padding: 40px 0 20px;
+    margin-top: 60px;
+    position: relative;
+    overflow: hidden;
+}
+
+.footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(circle at 30% 30%, rgba(255,255,255,0.1) 2px, transparent 2px),
+        radial-gradient(circle at 70% 70%, rgba(255,255,255,0.08) 1px, transparent 1px);
+    background-size: 150px 150px, 100px 100px;
+    animation: float 25s infinite linear;
+    pointer-events: none;
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 40px;
+    margin-bottom: 30px;
+}
+
+.footer-section h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #93c5fd;
+}
+
+.footer-section p, .footer-section li {
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.6;
+    margin-bottom: 10px;
+}
+
+.footer-section ul {
+    list-style: none;
+}
+
+.footer-section a {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer-section a:hover {
+    color: #93c5fd;
+}
+
+.footer-bottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    padding-top: 20px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+}
+
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-logo">
+                <img src="design/images/logo.png" alt="FloodGuard Logo" class="logo-image">
+                FloodGuard
+            </a>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">🏠 Dashboard</a></li>
+                <li><a href="#" class="nav-link active">📊 Monitoring</a></li>
+                <li><a href="alert.html" class="nav-link">🔔 Alerts</a></li>
+                <li><a href="map.html" class="nav-link">📍 Map</a></li>
+                <li class="profile-dropdown-container">
+                    <a href="#" class="nav-link profile-link-toggle">
+                        <img src="design/images/profile.png" alt="Profile" class="nav-profile-photo">
+                        <i class="fas fa-chevron-down profile-chevron"></i>
+                    </a>
+                    <div class="profile-dropdown-menu">
+                        <div class="dropdown-header">
+                            <img src="design/images/profile.png" alt="Profile" class="dropdown-profile-photo">
+                            <span>Welcome <br> Ernest Lazatin</span>
+                        </div>
+                        <a href="profile.html"><i class="fas fa-user-edit icon"></i>Edit Profile</a>
+                        <a href="#"><i class="fas fa-cog icon"></i>Settings</a>
+                        <a href="#"><i class="fas fa-user-circle icon"></i>Manage Account</a>
+                        <hr>
+                        <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt icon"></i>Logout</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <section class="header-section">
+            <h1>Real-Time Flood Monitoring</h1>
+            <div class="status-indicator">
+                <div class="status-dot green" id="statusDot"></div>
+                <span id="statusText">System Operational - Normal Conditions</span>
+            </div>
+            <div class="current-time" id="currentTime"></div>
+        </section>
+
+        <div class="warning-levels">
+            <div class="warning-level green">
+                <h3>✅ NORMAL</h3>
+                <p>Water levels are within safe parameters. Regular monitoring continues.</p>
+                <div style="font-weight: bold; margin-top: 0.5rem;">&lt; 2.0m</div>
+            </div>
+            <div class="warning-level orange">
+                <h3>⚠️ WARNING</h3>
+                <p>Elevated water levels detected. Increased monitoring and preparation advised.</p>
+                <div style="font-weight: bold; margin-top: 0.5rem;">2.0m - 3.5m</div>
+            </div>
+            <div class="warning-level red">
+                <h3>🔴 CRITICAL</h3>
+                <p>Dangerous water levels. Immediate evacuation and emergency response required.</p>
+                <div style="font-weight: bold; margin-top: 0.5rem;">&gt; 3.5m</div>
+            </div>
+        </div>
+
+        <hr class="styled-separator">
+
+        <div class="monitoring-container">
+            <div class="monitoring-grid">
+                <div class="monitoring-card">
+                    <div class="card-header">
+                        <div class="card-icon">🌊</div>
+                        <div class="card-title">Current Water Level</div>
+                    </div>
+                    <div class="metric-value" id="waterLevel">1.45m</div>
+                    <div class="metric-label">River Water Level</div>
+                </div>
+    
+                <div class="monitoring-card">
+                    <div class="card-header">
+                        <div class="card-icon">🌧️</div>
+                        <div class="card-title">Rainfall Intensity</div>
+                    </div>
+                    <div class="metric-value" id="rainfall">12.3mm/h</div>
+                    <div class="metric-label">Current Precipitation Rate</div>
+                </div>
+    
+                <div class="monitoring-card">
+                    <div class="card-header">
+                        <div class="card-icon">🌡️</div>
+                        <div class="card-title">Temperature</div>
+                    </div>
+                    <div class="metric-value" id="temperature">28.5°C</div>
+                    <div class="metric-label">Ambient Temperature</div>
+                </div>
+    
+                <div class="monitoring-card">
+                    <div class="card-header">
+                        <div class="card-icon">💨</div>
+                        <div class="card-title">Wind Speed</div>
+                    </div>
+                    <div class="metric-value" id="windSpeed">15.2 km/h</div>
+                    <div class="metric-label">Current Wind Velocity</div>
+                </div>
+            </div>
+    
+            <div class="sensors-section">
+                <h2 class="sensors-title">🔬 Professional Sensor Monitoring Station</h2>
+                <div class="sensors-grid">
+                    <div class="sensor-panel">
+                        <div class="sensor-header">
+                            <div class="sensor-info">
+                                <div class="sensor-icon">💧</div>
+                                <div class="sensor-details">
+                                    <h3>River Water Level & Rainfall</h3>
+                                    <div class="sensor-id">WLM-001</div>
+                                </div>
+                            </div>
+                            <div class="sensor-status online">ONLINE</div>
+                        </div>
+                        
+                        <div class="display-box" id="sensor1Display">1.42m</div>
+                        
+                        <div class="warning-lights">
+                            <div class="warning-light">
+                                <div class="light-bulb yellow active" id="sensor1Green"></div>
+                                <div class="light-label">NORMAL</div>
+                            </div>
+                            <div class="warning-light">
+                                <div class="light-bulb orange" id="sensor1Yellow"></div>
+                                <div class="light-label">WARNING</div>
+                            </div>
+                            <div class="warning-light">
+                                <div class="light-bulb red" id="sensor1Red"></div>
+                                <div class="light-label">CRITICAL</div>
+                            </div>
+                        </div>
+                        
+                        <div class="sensor-data">
+                            <div class="data-point">
+                                <span class="data-point-label">Rainfall Rate:</span>
+                                <span class="data-point-value" id="sensor1Rainfall">12.8 mm/h</span>
+                            </div>
+                            <div class="data-point">
+                                <span class="data-point-label">Flow Rate:</span>
+                                <span class="data-point-value" id="sensor1Flow">856 L/s</span>
+                            </div>
+                            <div class="data-point">
+                                <span class="data-point-label">Turbidity:</span>
+                                <span class="data-point-value" id="sensor1Turbidity">12.4 NTU</span>
+                            </div>
+                            <div class="data-point">
+                                <span class="data-point-label">Temp:</span>
+                                <span class="data-point-value" id="sensor1Temp">28.5°C</span>
+                            </div>
+                        </div>
+                    </div>
+    
+                    <div class="sensor-panel">
+                        <div class="sensor-header">
+                            <div class="sensor-info">
+                                <div class="sensor-icon">📍</div>
+                                <div class="sensor-details">
+                                    <h3>Barangay Entrance Flood Level</h3>
+                                    <div class="sensor-id">FDS-002</div>
+                                </div>
+                            </div>
+                            <div class="sensor-status online">ONLINE</div>
+                        </div>
+                        
+                        <div class="display-box" id="sensor2Display">0.5m</div>
+                        
+                        <div class="warning-lights">
+                            <div class="warning-light">
+                                <div class="light-bulb yellow active" id="sensor2Green"></div>
+                                <div class="light-label">NORMAL</div>
+                            </div>
+                            <div class="warning-light">
+                                <div class="light-bulb orange" id="sensor2Yellow"></div>
+                                <div class="light-label">WARNING</div>
+                            </div>
+                            <div class="warning-light">
+                                <div class="light-bulb red" id="sensor2Red"></div>
+                                <div class="light-label">CRITICAL</div>
+                            </div>
+                        </div>
+                        
+                        <div class="sensor-data">
+                            <div class="data-point">
+                                <span class="data-point-label">Rainfall Rate:</span>
+                                <span class="data-point-value" id="sensor2Rainfall">15.8 mm/h</span>
+                            </div>
+                            <div class="data-point">
+                                <span class="data-point-label">Ambient Temp:</span>
+                                <span class="data-point-value" id="sensor2Temp">27.8°C</span>
+                            </div>
+                            <div class="data-point">
+                                <span class="data-point-label">Humidity:</span>
+                                <span class="data-point-value" id="sensor2Humidity">87%</span>
+                            </div>
+                            <div class="data-point">
+                                <span class="data-point-label">Wind Speed:</span>
+                                <span class="data-point-value" id="sensor2Wind">18.3 km/h</span>
+                            </div>
+                        </div>
+                    </div>
+    
+                    <div class="sensor-panel">
+                        <div class="sensor-header">
+                            <div class="sensor-info">
+                                <div class="sensor-icon">🏠</div>
+                                <div class="sensor-details">
+                                    <h3>Barangay Middle Flood Level</h3>
+                                    <div class="sensor-id">FDS-003</div>
+                                </div>
+                            </div>
+                            <div class="sensor-status online">ONLINE</div>
+                        </div>
+                        
+                        <div class="display-box" id="sensor3Display">0.2m</div>
+                        
+                        <div class="warning-lights">
+                            <div class="warning-light">
+                                <div class="light-bulb yellow" id="sensor3Green"></div>
+                                <div class="light-label">NORMAL</div>
+                            </div>
+                            <div class="warning-light">
+                                <div class="light-bulb orange" id="sensor3Yellow"></div>
+                                <div class="light-label">WARNING</div>
+                            </div>
+                            <div class="warning-light">
+                                <div class="light-bulb red active" id="sensor3Red"></div>
+                                <div class="light-label">CRITICAL</div>
+                            </div>
+                        </div>
+                        
+                        <div class="sensor-data">
+                            <div class="data-point">
+                                <span class="data-point-label">Soil Moisture:</span>
+                                <span class="data-point-value" id="sensor3SoilMoisture">78.6%</span>
+                            </div>
+                            <div class="data-point">
+                                <span class="data-point-label">Ground Water:</span>
+                                <span class="data-point-value" id="sensor3GroundWater">1.85m</span>
+                            </div>
+                            <div class="data-point">
+                                <span class="data-point-label">Salinity:</span>
+                                <span class="data-point-value" id="sensor3Salinity">0.45 ppt</span>
+                            </div>
+                            <div class="data-point">
+                                <span class="data-point-label">Compaction:</span>
+                                <span class="data-point-value" id="sensor3Compaction">2.8 MPa</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="chart-container">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;">
+                    <h2 style="margin-bottom: 1rem; color: #1f2937; margin-right:auto;">📈 Water Level Trend</h2>
+            
+                    <!-- Range selector -->
+                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                        <label for="rangeSelect" style="font-weight:600; color:#374151;">View:</label>
+                        <select id="rangeSelect" aria-label="Select time range" style="padding:6px 10px; border-radius:8px; border:1px solid #e5e7eb; background:white;">
+                            <option value="24h" selected>24 Hours</option>
+                            <option value="month">Month (30 days)</option>
+                            <option value="year">Year (12 months)</option>
+                        </select>
+                    </div>
+                </div>
+            
+                <p style="margin:0 0 12px 0; color:#6b7280; font-size:0.95rem;">
+                    Data updated every 5 minutes • Last update: <span id="lastUpdate"></span>
+                </p>
+            
+                <div style="background:white; padding:16px; border-radius:12px; box-shadow: 0 6px 20px rgba(15,23,42,0.06);">
+                    <canvas id="waterLevelChart" width="1200" height="420" aria-label="Water level trend chart"></canvas>
+                </div>
+            </div>
+            
+         
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>🌊 FloodGuard</h3>
+                    <p>Protecting Barangay Colgante through advanced flood monitoring and early warning systems. Your safety is our mission.</p>
+                    <p><strong>📍 Location:</strong> Barangay Colgante</p>
+                    <p><strong>📞 Emergency:</strong> 911</p>
+                </div>
+
+                <div class="footer-section">
+                    <h3>🔗 Quick Links</h3>
+                    <ul>
+                        <li><a href="#">Dashboard</a></li>
+                        <li><a href="#">Flood Monitoring</a></li>
+                        <li><a href="#">Weather Updates</a></li>
+                        <li><a href="#">Emergency Contacts</a></li>
+                        <li><a href="#">Safety Guidelines</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3>📞 Contact Information</h3>
+                    <ul>
+                        <li>📧 info@floodguard.ph</li>
+                        <li>📱 +63 912 345 6789</li>
+                        <li>🏢 Barangay Colgante Hall</li>
+                        <li>⏰ 24/7 Monitoring</li>
+                        <li>🚨 Emergency Hotline: 911</li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3>🛡️ Community Safety</h3>
+                    <p>FloodGuard ensures the safety and security of all Barangay Colgante residents through:</p>
+                    <ul>
+                        <li>✓ 24/7 Water Level Monitoring</li>
+                        <li>✓ Weather Pattern Analysis</li>
+                        <li>✓ Emergency Response Coordination</li>
+                        <li>✓ Community Alert Systems</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>© 2025 FloodGuard - Barangay Colgante Protection System. All rights reserved. | Keeping our community safe, one alert at a time. 🌊💙</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="scripts/monitoring.js"></script>
+</body>
+</html>

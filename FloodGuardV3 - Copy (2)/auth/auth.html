@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FloodGuard - Monitor, Predict, Protect</title>
+    <link rel="stylesheet" href="/css/styleshet.css">
+</head>
+<body>
+    <div class="container">
+        <div class="logo">FloodGuard</div>
+        <p class="tagline">Monitor, Predict, Protect</p>
+        <img src="/design/images/logo.png" alt="FloodGuard Logo" class="logo-img">
+        
+        <div class="form-container">
+            <form class="form active" id="loginForm">
+                <h2 class="form-title">Welcome Back</h2>
+                <div class="form-group">
+                    <label for="loginEmail">Email Address</label>
+                    <input type="email" id="loginEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" name="password" required>
+                </div>
+                <button type="submit" class="submit-btn">Sign In</button>
+            </form>
+
+            <form class="form" id="registerForm">
+                <h2 class="form-title">Create Account</h2>
+                <div class="form-group">
+                    <label for="registerName">Full Name</label>
+                    <input type="text" id="registerName" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">Email Address</label>
+                    <input type="email" id="registerEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Password</label>
+                    <input type="password" id="registerPassword" name="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required>
+                </div>
+                <button type="submit" class="submit-btn">Create Account</button>
+            </form>
+        </div>
+
+        <div class="toggle-form">
+            <p id="toggleText">Don't have an account?</p>
+            <button type="button" class="toggle-btn" id="toggleBtn">Create Account</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="termsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">🛡️ FloodGuard Terms & Conditions</h2>
+                <p class="modal-subtitle">Please review and accept our terms to continue</p>
+            </div>
+            <div class="modal-body">
+                <div class="terms-content">
+                    <h3>🌊 Service Overview</h3>
+                    <p>FloodGuard provides flood monitoring, prediction, and protection services designed to help communities and individuals prepare for and respond to flood events.</p>
+
+                    <h3>📊 Data Usage & Privacy</h3>
+                    <ul>
+                        <li>We collect location data to provide accurate flood predictions for your area</li>
+                        <li>Weather and environmental data is processed to enhance our prediction algorithms</li>
+                        <li>Personal information is encrypted and stored securely</li>
+                        <li>Data is never shared with third parties without explicit consent</li>
+                    </ul>
+
+                    <h3>⚠️ Service Limitations</h3>
+                    <p>While FloodGuard strives for accuracy, our predictions are based on available data and models. Users should:</p>
+                    <ul>
+                        <li>Always follow official emergency guidance from local authorities</li>
+                        <li>Use FloodGuard as a supplementary tool, not the sole source of information</li>
+                        <li>Maintain emergency preparedness plans independent of our service</li>
+                    </ul>
+
+                    <h3>🔄 Service Availability</h3>
+                    <p>We aim for 99.9% uptime but cannot guarantee uninterrupted service. Critical alerts will be delivered through multiple channels when possible.</p>
+
+                    <h3>📱 User Responsibilities</h3>
+                    <ul>
+                        <li>Provide accurate location information for relevant alerts</li>
+                        <li>Keep contact information updated for emergency notifications</li>
+                        <li>Report any service issues or inaccuracies promptly</li>
+                        <li>Use the service responsibly and not for unauthorized purposes</li>
+                    </ul>
+
+                    <h3>🛡️ Limitation of Liability</h3>
+                    <p>FloodGuard provides information services and cannot be held liable for damages resulting from flood events. Users assume responsibility for their safety and property protection decisions.</p>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="acceptTerms">
+                    <label for="acceptTerms">I have read and agree to the Terms and Conditions, Privacy Policy, and understand the service limitations of FloodGuard.</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-btn modal-btn-cancel" id="cancelTerms">Cancel</button>
+                <button type="button" class="modal-btn modal-btn-accept" id="acceptTermsBtn" disabled>Accept & Continue</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/js/auth.js"></script>
+</body>
+</html>

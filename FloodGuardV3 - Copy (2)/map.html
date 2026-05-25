@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FloodGuard - Map & Preparedness</title>
+    <link rel="stylesheet" href="./css/designer.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="design/images/logo.png" alt="FloodGuard Logo" class="logo-image">
+                FloodGuard
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">🏠 Dashboard</a></li>
+                <li><a href="monitoring.html" class="nav-link">📊 Monitoring</a></li>
+                <li><a href="alert.html" class="nav-link">🔔 Alerts</a></li>
+                <li><a href="#" class="nav-link active">📍 Map</a></li>
+                <li class="profile-dropdown-container">
+                    <a href="#" class="nav-link profile-link-toggle">
+                        <img src="design/images/profile.png" alt="Profile" class="nav-profile-photo">
+                        <i class="fas fa-chevron-down profile-chevron"></i>
+                    </a>
+                    <div class="profile-dropdown-menu">
+                        <div class="dropdown-header">
+                            <img src="design/images/profile.png" alt="Profile" class="dropdown-profile-photo">
+                            <span>Welcome <br> Ernest Lazatin</span>
+                        </div>
+                        <a href="profile.html"><i class="fas fa-user-edit icon"></i>Edit Profile</a>
+                        <a href="#"><i class="fas fa-cog icon"></i>Settings</a>
+                        <a href="#"><i class="fas fa-user-circle icon"></i>Manage Account</a>
+                        <hr>
+                        <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt icon"></i>Logout</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <section class="header-section">
+            <h1>📍 Barangay Colgante Flood Preparedness Map</h1>
+            <p>Your comprehensive guide for flood safety. Monitor real-time sensor data, identify evacuation routes, and locate safe zones during emergencies.</p>
+        </section>
+
+        <div class="map-section">
+            <h2>🗺️ Live Flood Monitoring Map</h2>
+            <p style="color: #4b5563; margin-bottom: 1.5rem;">This interactive map displays live flood sensor locations, critical areas, and pre-defined safety zones. Your preparedness starts here.</p>
+            
+            <div class="map-container">
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14231.94949029226!2d120.73793103464904!3d14.94374839525581!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x339657a1aabdbec5%3A0x20bb1e9cadf8fe02!2sColgante%2C%20Apalit%2C%20Pampanga!5e0!3m2!1sen!2sph!4v1755202806895!5m2!1sen!2sph" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                
+                <div class="sensor-signal sensor-1" title="Riverside Sensor" data-sensor-id="1">S1</div>
+                <div class="sensor-signal sensor-2 warning" title="Sector B Sensor" data-sensor-id="2">S2</div>
+                <div class="sensor-signal sensor-3" title="Upland Sensor" data-sensor-id="3">S3</div>
+
+                <div class="map-legend">
+                    <div class="legend-title">Sensor Status</div>
+                    <div class="legend-item">
+                        <div class="legend-color active"></div>
+                        <span class="legend-text">Active</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color warning"></div>
+                        <span class="legend-text">Warning</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color critical"></div>
+                        <span class="legend-text">Critical</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-panel">
+                <div class="panel">
+                    <h3 class="panel-header">Sensor Status Overview</h3>
+                    <div class="sensor-status-grid">
+                        <div class="status-card active" data-sensor-id="1">
+                            <div class="status-icon"><i class="fas fa-check-circle"></i></div>
+                            <div class="status-title">Riverside Sensor (S1)</div>
+                            <div class="status-subtitle">Water Level: 1.5m (Normal)</div>
+                        </div>
+                        <div class="status-card warning" data-sensor-id="2">
+                            <div class="status-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                            <div class="status-title">Sector B Sensor (S2)</div>
+                            <div class="status-subtitle">Water Level: 2.8m (Warning)</div>
+                        </div>
+                        <div class="status-card active" data-sensor-id="3">
+                            <div class="status-icon"><i class="fas fa-check-circle"></i></div>
+                            <div class="status-title">Upland Sensor (S3)</div>
+                            <div class="status-subtitle">Water Level: 0.9m (Normal)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3 class="panel-header">Evacuation Routes & Safe Zones</h3>
+                    <div class="info-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                        <div>
+                            <p style="color: #4b5563; margin-bottom: 1rem;">Follow these pre-determined routes to reach safe zones safely during an evacuation.</p>
+                            <ul class="panel-list evacuation-routes">
+                                <li class="panel-list-item">
+                                    <span class="icon">➡️</span>
+                                    <span><strong>Route A: Main Road</strong><br>For residents of Sector 1 & 2. Proceed towards Barangay Hall.</span>
+                                </li>
+                                <li class="panel-list-item">
+                                    <span class="icon">➡️</span>
+                                    <span><strong>Route B: Riverside Road</strong><br>For residents near the river. Follow the marked path to the town plaza.</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div>
+                            <p style="color: #4b5563; margin-bottom: 1rem;">These are the designated locations where you can find shelter and assistance.</p>
+                            <ul class="panel-list safe-zones">
+                                <li class="panel-list-item">
+                                    <span class="icon">✅</span>
+                                    <span><strong>Barangay Hall</strong><br>Primary safe zone with emergency services and relief goods.</span>
+                                </li>
+                                <li class="panel-list-item">
+                                    <span class="icon">✅</span>
+                                    <span><strong>Colgante Elementary School</strong><br>Secondary safe zone, equipped for family shelter.</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>🌊 FloodGuard</h3>
+                    <p>Protecting Barangay Colgante through advanced flood monitoring and early warning systems. Your safety is our mission.</p>
+                    <p><strong>📍 Location:</strong> Barangay Colgante</p>
+                    <p><strong>📞 Emergency:</strong> 911</p>
+                </div>
+
+                <div class="footer-section">
+                    <h3>🔗 Quick Links</h3>
+                    <ul>
+                        <li><a href="#">Dashboard</a></li>
+                        <li><a href="#">Flood Monitoring</a></li>
+                        <li><a href="#">Weather Updates</a></li>
+                        <li><a href="#">Emergency Contacts</a></li>
+                        <li><a href="#">Safety Guidelines</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3>📞 Contact Information</h3>
+                    <ul>
+                        <li>📧 info@floodguard.ph</li>
+                        <li>📱 +63 912 345 6789</li>
+                        <li>🏢 Barangay Colgante Hall</li>
+                        <li>⏰ 24/7 Monitoring</li>
+                        <li>🚨 Emergency Hotline: 911</li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3>🛡️ Community Safety</h3>
+                    <p>FloodGuard ensures the safety and security of all Barangay Colgante residents through:</p>
+                    <ul>
+                        <li>✓ 24/7 Water Level Monitoring</li>
+                        <li>✓ Weather Pattern Analysis</li>
+                        <li>✓ Emergency Response Coordination</li>
+                        <li>✓ Community Alert Systems</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>© 2025 FloodGuard - Barangay Colgante Protection System. All rights reserved. | Keeping our community safe, one alert at a time. 🌊💙</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="./js/map.js"></script>
+
+</body>
+</html>

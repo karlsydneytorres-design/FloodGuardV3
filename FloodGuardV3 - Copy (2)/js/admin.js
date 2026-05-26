@@ -3,8 +3,8 @@
 // ============================================================
 
 import {
-  collection, doc, updateDoc, deleteDoc,
-  query, orderBy, onSnapshot, getDocs
+  collection, doc, updateDoc, deleteDoc, setDoc,
+  query, orderBy, onSnapshot, getDocs, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
@@ -386,6 +386,150 @@ if (profileToggle && dropdownMenu) {
   });
 }
 
+// ─── Sensor Toggles Table ─────────────────────────────────────
+function initSensorTogglesTable() {
+  const tbody = document.getElementById("sensor-toggles-tbody");
+  if (!tbody) return;
+
+  const BARANGAYS = [
+    {
+      id: "sulipan", name: "Barangay Sulipan",
+      sensors: [
+        { id: "WLM-001", type: "Water Level & Rainfall" }
+      ]
+    },
+    {
+      id: "paligui", name: "Barangay Paligui",
+      sensors: [
+        { id: "WLM-002", type: "Water Level & Rainfall" }
+      ]
+    },
+    {
+      id: "san_vicente", name: "Barangay San Vicente",
+      sensors: [
+        { id: "WLM-003", type: "Water Level & Rainfall" }
+      ]
+    }
+  ];
+
+  // Subscribe to all 9 sensor_toggles docs in real time
+  const docRefs = [];
+  for (const brgy of BARANGAYS) {
+    for (const sensor of brgy.sensors) {
+      docRefs.push({ brgy, sensor, key: `${brgy.id}_${sensor.id}` });
+    }
+  }
+
+  const toggleStates = {};
+
+  function renderSensorTable() {
+    let enabledCount = 0;
+    let html = "";
+
+    for (const brgy of BARANGAYS) {
+      const rowspan = brgy.sensors.length;
+      brgy.sensors.forEach((sensor, idx) => {
+        const key     = `${brgy.id}_${sensor.id}`;
+        const state   = toggleStates[key] ?? {};
+        const enabled = state.enabled ?? false;
+        if (enabled) enabledCount++;
+
+        const updatedAt = state.updatedAt?.toDate?.().toLocaleString("en-US", {
+          month: "short", day: "numeric",
+          hour: "2-digit", minute: "2-digit"
+        }) ?? "—";
+
+        html += `
+          <tr style="border-bottom:1px solid #f3f4f6;">
+            ${idx === 0 ? `
+            <td rowspan="${rowspan}" style="padding:14px 16px;vertical-align:top;
+                border-right:1px solid #f3f4f6;font-weight:600;color:#1e3a8a;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:18px;">🏘️</span>
+                <span>${brgy.name}</span>
+              </div>
+            </td>` : ""}
+            <td style="padding:14px 16px;font-family:monospace;font-size:13px;">${sensor.id}</td>
+            <td style="padding:14px 16px;font-size:13px;color:#374151;">${sensor.type}</td>
+            <td style="padding:14px 16px;">
+              <span style="
+                display:inline-flex;align-items:center;gap:6px;
+                background:#fee2e2;color:#991b1b;
+                padding:3px 10px;border-radius:20px;
+                font-size:12px;font-weight:600;
+              ">
+                <span style="width:7px;height:7px;border-radius:50%;
+                  background:#ef4444;display:inline-block;"></span>
+                OFFLINE
+              </span>
+            </td>
+            <td style="padding:14px 16px;">
+              <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;">
+                <div style="position:relative;width:44px;height:24px;">
+                  <input type="checkbox" ${enabled ? "checked" : ""}
+                    style="opacity:0;width:0;height:0;position:absolute;"
+                    onchange="adminToggleSensor('${brgy.id}','${sensor.id}',this.checked)">
+                  <div style="
+                    position:absolute;inset:0;border-radius:24px;
+                    background:${enabled ? "#2563eb" : "#d1d5db"};
+                    transition:background 0.3s;
+                  "></div>
+                  <div style="
+                    position:absolute;top:3px;
+                    left:${enabled ? "23px" : "3px"};
+                    width:18px;height:18px;border-radius:50%;
+                    background:white;transition:left 0.3s;
+                    box-shadow:0 1px 3px rgba(0,0,0,0.2);
+                  "></div>
+                </div>
+                <span style="font-size:13px;color:${enabled ? "#2563eb" : "#9ca3af"};">
+                  ${enabled ? "Enabled" : "Disabled"}
+                </span>
+              </label>
+            </td>
+            <td style="padding:14px 16px;font-size:12px;color:#9ca3af;">${updatedAt}</td>
+          </tr>`;
+      });
+    }
+
+    tbody.innerHTML = html;
+
+    const el = document.getElementById("stat-sensor-enabled");
+    if (el) el.textContent = enabledCount;
+  }
+
+  // Subscribe to each doc
+  for (const { key, brgy, sensor } of docRefs) {
+    const ref = doc(db, "sensor_toggles", key);
+    onSnapshot(ref, snap => {
+      toggleStates[key] = snap.exists() ? snap.data() : { enabled: false };
+      renderSensorTable();
+
+      // pulse the live indicator
+      const ind = document.getElementById("sensor-live-indicator");
+      if (ind) {
+        ind.style.transform = "scale(1.8)";
+        setTimeout(() => ind.style.transform = "scale(1)", 400);
+      }
+    });
+  }
+}
+
+// Admin toggle handler — called from inline onchange
+window.adminToggleSensor = async function(barangayId, sensorId, enabled) {
+  try {
+    await setDoc(
+      doc(db, "sensor_toggles", `${barangayId}_${sensorId}`),
+      { enabled, barangayId, sensorId, updatedAt: serverTimestamp() },
+      { merge: true }
+    );
+    showToast(`${sensorId} ${enabled ? "enabled" : "disabled"} successfully.`);
+  } catch (err) {
+    console.error(err);
+    showToast("Failed to update sensor toggle.", "error");
+  }
+};
+
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
       window.location.href = "/auth/auth.html";
@@ -416,6 +560,7 @@ if (profileToggle && dropdownMenu) {
 
     initUsersTable(user);
     initFeedbackTable();
+    initSensorTogglesTable();
 
     const sensorList = document.getElementById("sensor-configs-list");
     if (sensorList) {

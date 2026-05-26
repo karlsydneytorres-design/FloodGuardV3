@@ -1,445 +1,437 @@
-(function() {
-    // --- Utilities: random-walk generator for smooth realistic values ---
-    function generateRandomWalk(start, points, step, min, max) {
-        const arr = [start];
-        for (let i = 1; i < points; i++) {
-            // small random step biased by previous trend
-            const change = (Math.random() - 0.45) * step;
-            let next = arr[i-1] + change;
-            // gently clamp
-            if (next < min) next = min + Math.random() * (step/2);
-            if (next > max) next = max - Math.random() * (step/2);
-            arr.push(parseFloat(next.toFixed(2)));
-        }
-        return arr;
+// ============================================================
+//  scripts/monitoring.js
+//  Firestore-backed sensor dashboard
+//  All sensors are OFFLINE (hardware not yet deployed)
+// ============================================================
+
+import { db } from "../js/firebase-config.js";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  onSnapshot,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
+const BARANGAYS = [
+    {
+      id:       "sulipan",
+      name:     "Barangay Sulipan",
+      location: "Apalit, Pampanga",
+      sensors: [
+        { id: "WLM-001", type: "Water Level & Rainfall", icon: "💧" }
+      ]
+    },
+    {
+      id:       "paligui",
+      name:     "Barangay Paligui",
+      location: "Apalit, Pampanga",
+      sensors: [
+        { id: "WLM-002", type: "Water Level & Rainfall", icon: "💧" }
+      ]
+    },
+    {
+      id:       "san_vicente",
+      name:     "Barangay San Vicente",
+      location: "Apalit, Pampanga",
+      sensors: [
+        { id: "WLM-003", type: "Water Level & Rainfall", icon: "💧" }
+      ]
     }
+  ];
 
-    // --- Label builders ---
-    function labelsFor24h() {
-        const now = new Date();
-        const labels = [];
-        // 24 points back, label each hour
-        for (let i = 23; i >= 0; i--) {
-            const d = new Date(now.getTime() - i * 60 * 60 * 1000);
-            labels.push(d.getHours().toString().padStart(2, '0') + ':00');
-        }
-        return labels;
+// In-memory toggle state (loaded from Firestore)
+const sensorStates = {};  // key: "barangayId_sensorId" → { enabled: bool }
+
+// ── Firestore helpers ─────────────────────────────────────────────────────────
+
+// Returns Firestore doc ref for a sensor's toggle state
+function sensorDocRef(barangayId, sensorId) {
+  return doc(db, "sensor_toggles", `${barangayId}_${sensorId}`);
+}
+
+// Load all toggle states from Firestore, then render
+async function loadSensorStates() {
+  const promises = [];
+  for (const brgy of BARANGAYS) {
+    for (const sensor of brgy.sensors) {
+      const key = `${brgy.id}_${sensor.id}`;
+      promises.push(
+        getDoc(sensorDocRef(brgy.id, sensor.id)).then(snap => {
+          // Default to disabled if doc doesn't exist yet
+          sensorStates[key] = snap.exists() ? snap.data() : { enabled: false };
+        })
+      );
     }
+  }
+  await Promise.all(promises);
+}
 
-    function labelsForMonth(days = 30) {
-        const labels = [];
-        const now = new Date();
-        for (let i = days - 1; i >= 0; i--) {
-            const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-            labels.push((d.getMonth()+1) + '/' + d.getDate());
-        }
-        return labels;
-    }
-
-    function labelsForYear() {
-        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-        // show last 12 months ending this month
-        const now = new Date();
-        const labels = [];
-        for (let i = 11; i >= 0; i--) {
-            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-            labels.push(months[d.getMonth()] + ' ' + d.getFullYear().toString().slice(-2));
-        }
-        return labels;
-    }
-
-    // --- Data generators (realistic ranges for flood monitoring) ---
-    // Baseline depends on the type of sensor. We'll use ~1.4m baseline for 24h,
-    // slightly more variability on month, and seasonal shift for year.
-    function dataForRange(range) {
-        if (range === '24h') {
-            // hourly values - 24 points - small variations around ~1.4m to 2.3m
-            const start = 1.45 + (Math.random()-0.5)*0.2;
-            return generateRandomWalk(start, 24, 0.12, 0.6, 3.8);
-        } else if (range === 'month') {
-            // daily values - 30 points - moderate variability, possible wet period
-            const start = 1.3 + (Math.random()-0.5)*0.4;
-            return generateRandomWalk(start, 30, 0.18, 0.4, 4.2);
-        } else if (range === 'year') {
-            // monthly values - 12 points - smoother seasonal trend, slightly higher extremes
-            // start around 1.2 - seasonal ups and downs
-            const start = 1.2 + (Math.random()-0.5)*0.6;
-            return generateRandomWalk(start, 12, 0.25, 0.3, 5.0);
-        }
-        return [];
-    }
-
-    // --- Chart initialization ---
-    const canvas = document.getElementById('waterLevelChart');
-    const ctx = canvas.getContext('2d');
-
-    // Create gradient fill (sky blue -> deeper blue)
-    function createGradient() {
-        const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
-        g.addColorStop(0, 'rgba(30,144,255,0.18)');  // top (soft)
-        g.addColorStop(0.6, 'rgba(77,184,255,0.08)');
-        g.addColorStop(1, 'rgba(8,47,73,0)');
-        return g;
-    }
-
-    // Create new Chart instance
-    let waterChart = null;
-    function buildChart(labels, data) {
-        const dataset = {
-            label: 'Water Level (m)',
-            data: data,
-            tension: 0.35, // smooth curve
-            borderWidth: 2.5,
-            pointRadius: 3.5,
-            pointHoverRadius: 6,
-            fill: true,
-            backgroundColor: createGradient(),
-            borderColor: '#0ea5e9', // medium sky blue
-            pointBackgroundColor: '#0369a1'
-        };
-
-        const cfg = {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [dataset]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: {
-                        grid: {
-                            display: false
-                        },
-                        ticks: {
-                            color: '#374151',
-                            maxRotation: 0,
-                            autoSkip: true,
-                            maxTicksLimit: 12
-                        }
-                    },
-                    y: {
-                        beginAtZero: false,
-                        ticks: {
-                            callback: function(value) {
-                                return value + ' m';
-                            },
-                            color: '#374151'
-                        },
-                        grid: {
-                            color: 'rgba(15,23,42,0.06)'
-                        },
-                        // suggested bounds to keep chart readable
-                        suggestedMin: 0,
-                        suggestedMax: 6
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return ' ' + context.parsed.y.toFixed(2) + ' m';
-                            }
-                        },
-                        titleColor: '#0f172a',
-                        bodyColor: '#0f172a',
-                        backgroundColor: '#ffffff',
-                        borderColor: 'rgba(15,23,42,0.06)',
-                        borderWidth: 1,
-                        padding: 10
-                    }
-                },
-                interaction: {
-                    mode: 'index',
-                    intersect: false
-                },
-                animation: {
-                    duration: 600,
-                    easing: 'easeOutQuad'
-                }
-            }
-        };
-
-        if (waterChart) {
-            waterChart.destroy();
-        }
-        // set a specific height for nicer look
-        canvas.style.height = '360px';
-        waterChart = new Chart(ctx, cfg);
-    }
-
-    // --- Update chart with new range (handles label/data generation) ---
-    function updateChartForRange(range) {
-        let labels, data;
-        if (range === '24h') {
-            labels = labelsFor24h();
-            data = dataForRange('24h');
-        } else if (range === 'month') {
-            labels = labelsForMonth(30);
-            data = dataForRange('month');
-        } else if (range === 'year') {
-            labels = labelsForYear();
-            data = dataForRange('year');
-        } else {
-            labels = labelsFor24h();
-            data = dataForRange('24h');
-        }
-
-        buildChart(labels, data);
-    }
-
-    // --- Wire up range selector ---
-    const rangeSelect = document.getElementById('rangeSelect');
-    rangeSelect.addEventListener('change', function() {
-        // immediately update chart when user selects a range
-        updateChartForRange(this.value);
-        // also update last update timestamp for clarity
-        updateLastUpdate();
+// Save toggle state to Firestore
+async function saveSensorState(barangayId, sensorId, enabled) {
+  const key = `${barangayId}_${sensorId}`;
+  sensorStates[key] = { enabled };
+  try {
+    await setDoc(sensorDocRef(barangayId, sensorId), {
+      enabled,
+      barangayId,
+      sensorId,
+      updatedAt: serverTimestamp()
     });
+  } catch (err) {
+    console.error("Failed to save sensor state:", err);
+  }
+}
 
-    // --- Last update display ---
-    function updateLastUpdate() {
-        const now = new Date();
-        // Format: Sep 11, 2025 07:24:15 PM (Asia/Manila)
-        const options = {
-            timeZone: 'Asia/Manila',
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        };
-        document.getElementById('lastUpdate').textContent = now.toLocaleString('en-PH', options);
+// Subscribe to real-time toggle updates so multiple admin tabs stay in sync
+function subscribeToToggleUpdates() {
+  for (const brgy of BARANGAYS) {
+    for (const sensor of brgy.sensors) {
+      const key = `${brgy.id}_${sensor.id}`;
+      onSnapshot(sensorDocRef(brgy.id, sensor.id), snap => {
+        if (snap.exists()) {
+          sensorStates[key] = snap.data();
+          // Update the toggle UI if it exists
+          const toggle = document.getElementById(`toggle_${key}`);
+          if (toggle) toggle.checked = snap.data().enabled;
+          // Re-render the status badge
+          const badge = document.getElementById(`status_${key}`);
+          if (badge) renderStatusBadge(badge, false); // hardware always offline
+        }
+      });
+    }
+  }
+}
+
+// ── DOM Builders ──────────────────────────────────────────────────────────────
+
+function renderStatusBadge(el, _hardwareOnline) {
+  // Sensors are always offline — hardware not deployed
+  el.innerHTML = `
+    <span class="sensor-status offline" style="
+      display:inline-flex; align-items:center; gap:6px;
+      background:#fee2e2; color:#991b1b;
+      padding:3px 10px; border-radius:20px;
+      font-size:12px; font-weight:600; letter-spacing:0.5px;
+    ">
+      <span style="width:7px;height:7px;border-radius:50%;background:#ef4444;display:inline-block;"></span>
+      OFFLINE
+    </span>`;
+}
+
+function buildSensorTable() {
+  const container = document.getElementById("sensorTableContainer");
+  if (!container) return;
+
+  let html = `
+    <div style="overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:14px;">
+      <thead>
+        <tr style="background:#f1f5f9;text-align:left;">
+          <th style="padding:12px 16px;font-weight:600;color:#1e40af;border-bottom:2px solid #e2e8f0;">Barangay</th>
+          <th style="padding:12px 16px;font-weight:600;color:#1e40af;border-bottom:2px solid #e2e8f0;">Sensor ID</th>
+          <th style="padding:12px 16px;font-weight:600;color:#1e40af;border-bottom:2px solid #e2e8f0;">Type</th>
+          <th style="padding:12px 16px;font-weight:600;color:#1e40af;border-bottom:2px solid #e2e8f0;">Status</th>
+          <th style="padding:12px 16px;font-weight:600;color:#1e40af;border-bottom:2px solid #e2e8f0;">Water Level</th>
+          <th style="padding:12px 16px;font-weight:600;color:#1e40af;border-bottom:2px solid #e2e8f0;">Rainfall</th>
+          <th style="padding:12px 16px;font-weight:600;color:#1e40af;border-bottom:2px solid #e2e8f0;text-align:center;">Enable / Disable</th>
+        </tr>
+      </thead>
+      <tbody>`;
+
+  for (const brgy of BARANGAYS) {
+    const rowspan = brgy.sensors.length;
+    brgy.sensors.forEach((sensor, idx) => {
+      const key = `${brgy.id}_${sensor.id}`;
+      const checked = sensorStates[key]?.enabled ? "checked" : "";
+      html += `
+        <tr style="border-bottom:1px solid #e2e8f0;transition:background 0.2s;" 
+            onmouseover="this.style.background='#f8fafc'" 
+            onmouseout="this.style.background='white'">
+          ${idx === 0 ? `<td rowspan="${rowspan}" style="padding:12px 16px;font-weight:600;color:#1e3a8a;vertical-align:top;border-right:1px solid #e2e8f0;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:20px;">🏘️</span>
+              <div>
+                <div>${brgy.name}</div>
+                <div style="font-size:12px;color:#6b7280;font-weight:400;">${brgy.location}</div>
+              </div>
+            </div>
+          </td>` : ""}
+          <td style="padding:12px 16px;font-family:monospace;color:#374151;">${sensor.icon} ${sensor.id}</td>
+          <td style="padding:12px 16px;color:#374151;">${sensor.type}</td>
+          <td style="padding:12px 16px;" id="status_${key}"></td>
+          <td style="padding:12px 16px;color:#9ca3af;font-style:italic;">— N/A (offline)</td>
+          <td style="padding:12px 16px;color:#9ca3af;font-style:italic;">— N/A (offline)</td>
+          <td style="padding:12px 16px;text-align:center;">
+            <label class="toggle-switch" style="position:relative;display:inline-block;width:48px;height:26px;cursor:pointer;" title="Toggle sensor monitoring">
+              <input type="checkbox" id="toggle_${key}" ${checked}
+                style="opacity:0;width:0;height:0;position:absolute;"
+                onchange="handleToggle('${brgy.id}', '${sensor.id}', this.checked)">
+              <span class="toggle-slider" style="
+                position:absolute;top:0;left:0;right:0;bottom:0;
+                background:${checked ? "#2563eb" : "#cbd5e1"};
+                border-radius:26px;transition:background 0.3s;
+              "></span>
+              <span style="
+                position:absolute;top:3px;left:${checked ? "25px" : "3px"};
+                width:20px;height:20px;border-radius:50%;background:white;
+                transition:left 0.3s;box-shadow:0 1px 3px rgba(0,0,0,0.2);
+              " id="knob_${key}"></span>
+            </label>
+          </td>
+        </tr>`;
+    });
+  }
+
+  html += `</tbody></table></div>`;
+  container.innerHTML = html;
+
+  // Render all status badges
+  for (const brgy of BARANGAYS) {
+    for (const sensor of brgy.sensors) {
+      const key = `${brgy.id}_${sensor.id}`;
+      const badge = document.getElementById(`status_${key}`);
+      if (badge) renderStatusBadge(badge, false);
+    }
+  }
+}
+
+// ── Toggle handler (called from inline onchange) ──────────────────────────────
+window.handleToggle = async function(barangayId, sensorId, enabled) {
+  const key = `${barangayId}_${sensorId}`;
+
+  // Animate slider
+  const knob = document.getElementById(`knob_${key}`);
+  const slider = knob?.previousElementSibling;
+  if (knob) knob.style.left = enabled ? "25px" : "3px";
+  if (slider) slider.style.background = enabled ? "#2563eb" : "#cbd5e1";
+
+  await saveSensorState(barangayId, sensorId, enabled);
+
+  // Show brief feedback toast
+  showToast(
+    enabled
+      ? `${sensorId} monitoring enabled (awaiting hardware)`
+      : `${sensorId} monitoring disabled`
+  );
+};
+
+// ── Sensor panels (hero cards) ────────────────────────────────────────────────
+function buildSensorPanels() {
+  const container = document.getElementById("sensorsGrid");
+  if (!container) return;
+
+  let html = "";
+  for (const brgy of BARANGAYS) {
+    html += `
+      <div style="
+        background:white;border-radius:16px;padding:24px;
+        border:1px solid #e2e8f0;margin-bottom:20px;
+        box-shadow:0 2px 8px rgba(0,0,0,0.05);
+      ">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;
+                    padding-bottom:14px;border-bottom:1px solid #f1f5f9;">
+          <span style="font-size:24px;">🏘️</span>
+          <div>
+            <h3 style="margin:0;color:#1e3a8a;font-size:17px;">${brgy.name}</h3>
+            <p style="margin:0;font-size:13px;color:#6b7280;">${brgy.location}</p>
+          </div>
+          <span style="margin-left:auto;background:#fee2e2;color:#991b1b;
+            padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;">
+            ALL SENSORS OFFLINE
+          </span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;">`;
+
+    for (const sensor of brgy.sensors) {
+      html += `
+          <div style="
+            background:#f8fafc;border-radius:12px;padding:18px;
+            border:1px solid #e2e8f0;
+          ">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:22px;">${sensor.icon}</span>
+                <div>
+                  <div style="font-weight:600;font-size:13px;color:#1e40af;">${sensor.id}</div>
+                  <div style="font-size:11px;color:#6b7280;">${sensor.type}</div>
+                </div>
+              </div>
+            </div>
+            <div style="
+              background:#1e293b;border-radius:8px;padding:14px;
+              text-align:center;font-family:monospace;margin-bottom:12px;
+            ">
+              <div style="color:#ef4444;font-size:22px;font-weight:700;letter-spacing:2px;">
+                -- --
+              </div>
+              <div style="color:#64748b;font-size:11px;margin-top:4px;">NO SIGNAL</div>
+            </div>
+            <div style="display:flex;gap:8px;justify-content:center;">
+              <div style="text-align:center;flex:1;">
+                <div style="width:18px;height:18px;border-radius:50%;background:#374151;margin:0 auto 4px;"></div>
+                <div style="font-size:10px;color:#9ca3af;">NORMAL</div>
+              </div>
+              <div style="text-align:center;flex:1;">
+                <div style="width:18px;height:18px;border-radius:50%;background:#374151;margin:0 auto 4px;"></div>
+                <div style="font-size:10px;color:#9ca3af;">WARNING</div>
+              </div>
+              <div style="text-align:center;flex:1;">
+                <div style="width:18px;height:18px;border-radius:50%;background:#374151;margin:0 auto 4px;"></div>
+                <div style="font-size:10px;color:#9ca3af;">CRITICAL</div>
+              </div>
+            </div>
+            <div style="
+              margin-top:12px;font-size:11px;color:#9ca3af;
+              text-align:center;border-top:1px solid #e2e8f0;padding-top:10px;
+            ">
+              Waiting for hardware connection
+            </div>
+          </div>`;
     }
 
-    // --- Periodic refresh to simulate live feed (only updates chart data values, preserving labels & shape) ---
-    function refreshChartDataPreserveLabels() {
-        if (!waterChart) return;
-        // produce a new dataset array by applying a tiny random-walk step to existing points
-        const old = waterChart.data.datasets[0].data.slice();
-        const stepped = old.map((v, i) => {
-            // small change; keep changes realistic
-            const delta = (Math.random() - 0.48) * 0.08;
-            let nv = parseFloat((v + delta).toFixed(2));
-            if (nv < 0) nv = 0.0;
-            return nv;
-        });
-        // Replace data and update chart
-        waterChart.data.datasets[0].data = stepped;
-        // regenerate gradient (in case of resize)
-        waterChart.data.datasets[0].backgroundColor = createGradient();
-        waterChart.update();
-        updateLastUpdate();
+    html += `</div></div>`;
+  }
+
+  container.innerHTML = html;
+}
+
+// ── Analytics (offline) ───────────────────────────────────────────────────────
+function buildOfflineChart() {
+  const canvas = document.getElementById("waterLevelChart");
+  if (!canvas) return;
+
+  // Show offline overlay over the canvas area
+  const wrapper = canvas.closest(".chart-container") || canvas.parentElement;
+  const overlay = document.createElement("div");
+  overlay.style.cssText = `
+    position:relative;background:#1e293b;border-radius:12px;
+    padding:60px 20px;text-align:center;margin-top:12px;
+  `;
+  overlay.innerHTML = `
+    <div style="color:#475569;font-size:48px;margin-bottom:16px;">📡</div>
+    <div style="color:#94a3b8;font-size:18px;font-weight:600;margin-bottom:8px;">
+      Analytics Offline
+    </div>
+    <div style="color:#64748b;font-size:14px;max-width:400px;margin:0 auto;">
+      No sensor data is currently being received.<br>
+      Charts will populate automatically once hardware is connected and sensors come online.
+    </div>
+    <div style="
+      margin-top:24px;display:inline-flex;align-items:center;gap:8px;
+      background:#0f172a;padding:8px 18px;border-radius:20px;
+    ">
+      <span style="width:8px;height:8px;border-radius:50%;background:#ef4444;
+        display:inline-block;animation:pulse 1.5s infinite;"></span>
+      <span style="color:#64748b;font-size:13px;">0 / 9 sensors online</span>
+    </div>
+    <style>
+      @keyframes pulse {
+        0%,100%{opacity:1} 50%{opacity:0.3}
+      }
+    </style>
+  `;
+
+  // Hide canvas and insert overlay
+  canvas.style.display = "none";
+  const canvasParent = canvas.parentElement;
+  canvasParent.style.cssText = "position:relative;";
+  canvasParent.appendChild(overlay);
+}
+
+// ── Summary metric cards ──────────────────────────────────────────────────────
+function buildOfflineMetrics() {
+  const ids = ["waterLevel", "rainfall", "temperature", "windSpeed"];
+  const labels = ["Current Water Level", "Rainfall Intensity", "Temperature", "Wind Speed"];
+  ids.forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.textContent = "—";
+      el.style.color = "#9ca3af";
+      el.title = `${labels[i]}: sensor offline`;
     }
+  });
 
-    // --- Initialize with 24h by default ---
-    updateChartForRange('24h');
-    updateLastUpdate();
+  const statusDot = document.getElementById("statusDot");
+  const statusText = document.getElementById("statusText");
+  if (statusDot) {
+    statusDot.className = "status-dot";
+    statusDot.style.cssText = "background:#ef4444;animation:none;";
+  }
+  if (statusText) {
+    statusText.textContent = "All Sensors Offline — Awaiting Hardware Deployment";
+    statusText.style.color = "#ef4444";
+  }
+}
 
-    // Refresh the chart values every 5 minutes in real app, but for demo use 5s so you see updates.
-    // In your production site you can change the interval to 300000 (5 minutes).
-    const demoIntervalMs = 5000; // for demonstrative live feeling
-    setInterval(refreshChartDataPreserveLabels, demoIntervalMs);
+// ── Toast helper ──────────────────────────────────────────────────────────────
+function showToast(message) {
+  const toast = document.createElement("div");
+  toast.style.cssText = `
+    position:fixed;bottom:24px;right:24px;z-index:9999;
+    background:#1e293b;color:white;padding:12px 20px;
+    border-radius:10px;font-size:14px;font-weight:500;
+    box-shadow:0 4px 16px rgba(0,0,0,0.3);
+    animation:slideIn 0.3s ease;max-width:320px;
+  `;
+  toast.textContent = message;
+  document.body.appendChild(toast);
 
-    // Also keep lastUpdate ticking every second to match other time displays
-    setInterval(updateLastUpdate, 1000);
+  const style = document.createElement("style");
+  style.textContent = `@keyframes slideIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}`;
+  document.head.appendChild(style);
 
-    // Accessibility: keyboard control for select
-    rangeSelect.addEventListener('keyup', function(e) {
-        if (e.key === 'Enter') {
-            updateChartForRange(this.value);
-        }
-    });
+  setTimeout(() => toast.remove(), 3000);
+}
 
-    // Rebuild gradient on window resize for crispness
-    window.addEventListener('resize', () => {
-        if (waterChart) {
-            waterChart.data.datasets[0].backgroundColor = createGradient();
-            waterChart.update('none');
-        }
-    });
-})();
-        document.addEventListener('DOMContentLoaded', () => {
-            // Profile dropdown functionality
-            const profileDropdown = document.querySelector('.profile-dropdown-container');
-            const dropdownMenu = document.querySelector('.profile-dropdown-menu');
+// ── Time display ──────────────────────────────────────────────────────────────
+function updateTime() {
+  const now = new Date();
+  const opts = {
+    timeZone: "Asia/Manila",
+    year: "numeric", month: "short", day: "numeric",
+    hour: "2-digit", minute: "2-digit", second: "2-digit"
+  };
+  const el = document.getElementById("currentTime");
+  if (el) el.textContent = "Last Updated: " + now.toLocaleString("en-PH", opts);
 
-            if (profileDropdown && dropdownMenu) {
-                profileDropdown.addEventListener('click', (event) => {
-                    event.stopPropagation();
-                    dropdownMenu.classList.toggle('show');
-                });
+  const lu = document.getElementById("lastUpdate");
+  if (lu) lu.textContent = now.toLocaleTimeString("en-PH", { timeZone: "Asia/Manila" });
+}
 
-                window.onclick = function(event) {
-                    if (!event.target.closest('.profile-dropdown-container')) {
-                        if (dropdownMenu.classList.contains('show')) {
-                            dropdownMenu.classList.remove('show');
-                        }
-                    }
-                }
-            }
+ // Profile dropdown functionality
+ const profileDropdown = document.querySelector('.profile-dropdown-container');
+ const dropdownMenu = document.querySelector('.profile-dropdown-menu');
 
-            // Live data simulation
-            function updateTime() {
-                const now = new Date();
-                document.getElementById('currentTime').textContent = 
-                    'Last Updated: ' + now.toLocaleString('en-PH', {
-                        timeZone: 'Asia/Manila',
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        second: '2-digit'
-                    });
-                document.getElementById('lastUpdate').textContent = now.toLocaleTimeString('en-PH', {
-                    timeZone: 'Asia/Manila'
-                });
-            }
+ if (profileDropdown && dropdownMenu) {
+     profileDropdown.addEventListener('click', (event) => {
+         event.stopPropagation();
+         dropdownMenu.classList.toggle('show');
+     });
 
-            function generateRealisticData() {
-                // Main dashboard metrics (simulated)
-                const waterLevel = 1.45 + (Math.random() - 0.5) * 0.3; // River Water Level
-                const rainfall = 12.3 + (Math.random() - 0.5) * 8;
-                const temperature = 28.5 + (Math.random() - 0.5) * 4;
-                const windSpeed = 15.2 + (Math.random() - 0.5) * 10;
-                
-                // Update warning status based on river water level
-                const statusDot = document.getElementById('statusDot');
-                const statusText = document.getElementById('statusText');
-                
-                if (statusDot && statusText) {
-                    if (waterLevel < 2.0) {
-                        statusDot.className = 'status-dot green';
-                        statusText.textContent = 'System Operational - Normal Conditions';
-                    } else if (waterLevel < 3.5) {
-                        statusDot.className = 'status-dot orange';
-                        statusText.textContent = 'Warning Level - Elevated Water Detected';
-                    } else {
-                        statusDot.className = 'status-dot red';
-                        statusText.textContent = 'Critical Alert - Immediate Response Required';
-                    }
-                }
-                
-                // Update main metrics
-                if (document.getElementById('waterLevel')) document.getElementById('waterLevel').textContent = waterLevel.toFixed(2) + 'm';
-                if (document.getElementById('rainfall')) document.getElementById('rainfall').textContent = rainfall.toFixed(1) + 'mm/h';
-                if (document.getElementById('temperature')) document.getElementById('temperature').textContent = temperature.toFixed(1) + '°C';
-                if (document.getElementById('windSpeed')) document.getElementById('windSpeed').textContent = windSpeed.toFixed(1) + ' km/h';
-            }
+     window.onclick = function(event) {
+         if (!event.target.closest('.profile-dropdown-container')) {
+             if (dropdownMenu.classList.contains('show')) {
+                 dropdownMenu.classList.remove('show');
+             }
+         }
+     }
+ }
 
-            // Professional Sensor Data Updates
-            function updateSensorData() {
-                // Sensor 1: River Water Level & Rainfall
-                const riverWaterLevel = 1.42 + (Math.random() - 0.5) * 0.4;
-                const riverRainfall = 12.8 + (Math.random() - 0.5) * 8;
-                if (document.getElementById('sensor1Display')) document.getElementById('sensor1Display').textContent = riverWaterLevel.toFixed(2) + 'm';
-                if (document.getElementById('sensor1Rainfall')) document.getElementById('sensor1Rainfall').textContent = Math.max(0, riverRainfall).toFixed(1) + ' mm/h';
-                if (document.getElementById('sensor1Flow')) document.getElementById('sensor1Flow').textContent = Math.floor(840 + Math.random() * 40) + ' L/s';
-                if (document.getElementById('sensor1Turbidity')) document.getElementById('sensor1Turbidity').textContent = (12 + Math.random() * 3).toFixed(1) + ' NTU';
-                if (document.getElementById('sensor1Temp')) document.getElementById('sensor1Temp').textContent = (28 + Math.random() * 2).toFixed(1) + '°C';
-                
-                // Update Sensor 1 lights based on river water level
-                updateSensorLights('sensor1', riverWaterLevel, [2.0, 3.5]);
+// ── Boot ──────────────────────────────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", async () => {
+  initDropdown();
+  updateTime();
+  setInterval(updateTime, 1000);
 
-                // Sensor 2: Barangay Entrance Flood Level
-                const entranceFloodLevel = 0.5 + (Math.random() - 0.5) * 0.8;
-                const entranceRainfall = 15.8 + (Math.random() - 0.5) * 8;
-                if (document.getElementById('sensor2Display')) document.getElementById('sensor2Display').textContent = Math.max(0, entranceFloodLevel).toFixed(2) + 'm';
-                if (document.getElementById('sensor2Rainfall')) document.getElementById('sensor2Rainfall').textContent = Math.max(0, entranceRainfall).toFixed(1) + ' mm/h';
-                if (document.getElementById('sensor2Temp')) document.getElementById('sensor2Temp').textContent = (27 + Math.random() * 3).toFixed(1) + '°C';
-                if (document.getElementById('sensor2Humidity')) document.getElementById('sensor2Humidity').textContent = Math.floor(85 + Math.random() * 8) + '%';
-                if (document.getElementById('sensor2Wind')) document.getElementById('sensor2Wind').textContent = (18 + Math.random() * 6).toFixed(1) + ' km/h';
-                
-                // Update Sensor 2 lights based on flood level
-                updateSensorLights('sensor2', entranceFloodLevel, [0.5, 1.0]);
+  // Load Firestore toggle states first, then build UI
+  await loadSensorStates();
 
-                // Sensor 3: Barangay Middle Flood & Environment
-                const middleFloodLevel = 0.2 + (Math.random() - 0.5) * 0.5;
-                const soilMoisture = 78.6 + (Math.random() - 0.5) * 12;
-                if (document.getElementById('sensor3Display')) document.getElementById('sensor3Display').textContent = Math.max(0, middleFloodLevel).toFixed(2) + 'm';
-                if (document.getElementById('sensor3SoilMoisture')) document.getElementById('sensor3SoilMoisture').textContent = Math.max(0, Math.min(100, soilMoisture)).toFixed(1) + '%';
-                if (document.getElementById('sensor3GroundWater')) document.getElementById('sensor3GroundWater').textContent = (1.8 + Math.random() * 0.3).toFixed(2) + 'm';
-                if (document.getElementById('sensor3Salinity')) document.getElementById('sensor3Salinity').textContent = (0.4 + Math.random() * 0.2).toFixed(2) + ' ppt';
-                if (document.getElementById('sensor3Compaction')) document.getElementById('sensor3Compaction').textContent = (2.7 + Math.random() * 0.4).toFixed(1) + ' MPa';
-                
-                // Update Sensor 3 lights based on flood level
-                updateSensorLights('sensor3', middleFloodLevel, [0.4, 0.7]);
-            }
+  buildSensorPanels();     // hero sensor cards per barangay
+  buildSensorTable();      // management table with toggles
+  buildOfflineMetrics();   // top metric cards → all offline
+  buildOfflineChart();     // analytics → offline overlay
 
-            function updateSensorLights(sensorId, value, thresholds) {
-                const green = document.getElementById(sensorId + 'Green');
-                const yellow = document.getElementById(sensorId + 'Yellow');
-                const red = document.getElementById(sensorId + 'Red');
-                
-                // Reset all lights
-                if (green) green.classList.remove('active');
-                if (yellow) yellow.classList.remove('active');
-                if (red) red.classList.remove('active');
-                
-                // Activate appropriate light based on thresholds
-                if (value < thresholds[0] && green) {
-                    green.classList.add('active');
-                } else if (value < thresholds[1] && yellow) {
-                    yellow.classList.add('active');
-                } else if (red) {
-                    red.classList.add('active');
-                }
-            }
-
-            // Add interactive effects to sensor panels
-            function initializeSensorInteractivity() {
-                document.querySelectorAll('.sensor-panel').forEach(panel => {
-                    panel.addEventListener('mouseenter', function() {
-                        this.style.transform = 'translateY(-3px)';
-                        this.style.boxShadow = '0 8px 25px rgba(59, 130, 246, 0.15)';
-                    });
-                    
-                    panel.addEventListener('mouseleave', function() {
-                        this.style.transform = 'translateY(0)';
-                        this.style.boxShadow = 'none';
-                    });
-                });
-                
-                // Add click effect to warning lights
-                document.querySelectorAll('.light-bulb').forEach(bulb => {
-                    bulb.addEventListener('click', function() {
-                        // Add a temporary pulse effect
-                        this.style.transform = 'scale(1.1)';
-                        setTimeout(() => {
-                            this.style.transform = 'scale(1)';
-                        }, 200);
-                    });
-                });
-            }
-
-            // Initialize and update data
-            updateTime();
-            generateRealisticData();
-            updateSensorData();
-            initializeSensorInteractivity();
-            
-            // Update time every second
-            setInterval(updateTime, 1000);
-            
-            // Update main sensor data every 5 seconds
-            setInterval(generateRealisticData, 5000);
-            
-            // Update professional sensor data every 3 seconds
-            setInterval(updateSensorData, 3000);
-            
-            // Add some interactive effects to monitoring cards
-            document.querySelectorAll('.monitoring-card').forEach(card => {
-                card.addEventListener('mouseenter', function() {
-                    this.style.background = 'rgba(255, 255, 255, 1)';
-                });
-                card.addEventListener('mouseleave', function() {
-                    this.style.background = 'rgba(255, 255, 255, 0.95)';
-                });
-            });
-        });
+  // Subscribe to real-time Firestore updates for toggle sync
+  subscribeToToggleUpdates();
+});

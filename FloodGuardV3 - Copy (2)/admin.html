@@ -564,6 +564,61 @@
 <!-- sensor configs stays below -->
 <div id="sensor-configs-list"></div>
 
+<!-- Sensor Toggle Management -->
+<div style="margin-top: 32px;">
+  <div class="page-header" style="margin-bottom: 16px;">
+    <div class="page-header-left">
+      <h1 style="font-size: 1.5rem;">📡 Sensor Management</h1>
+      <p>Monitor and toggle flood sensors across all barangays — Apalit, Pampanga</p>
+    </div>
+    <div class="live-badge">
+      <span id="sensor-live-indicator" style="width:9px;height:9px;border-radius:50%;background:#ef4444;display:inline-block;"></span>
+      ALL OFFLINE
+    </div>
+  </div>
+
+  <div class="stats-bar" style="grid-template-columns: repeat(4,1fr); margin-bottom: 20px;">
+    <div class="stat-card" style="border-color: #3b82f6;">
+      <span class="stat-label">Total Sensors</span>
+      <span class="stat-value" id="stat-sensor-total">3</span>
+    </div>
+    <div class="stat-card" style="border-color: #22c55e;">
+      <span class="stat-label">Online</span>
+      <span class="stat-value" id="stat-sensor-online">0</span>
+    </div>
+    <div class="stat-card" style="border-color: #ef4444;">
+      <span class="stat-label">Offline</span>
+      <span class="stat-value" id="stat-sensor-offline">3</span>
+    </div>
+    <div class="stat-card" style="border-color: #f59e0b;">
+      <span class="stat-label">Enabled (toggle)</span>
+      <span class="stat-value" id="stat-sensor-enabled">—</span>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table class="user-table">
+      <thead>
+        <tr>
+          <th>Barangay</th>
+          <th>Sensor ID</th>
+          <th>Type</th>
+          <th>Hardware Status</th>
+          <th>Toggle Enabled</th>
+          <th>Last Updated</th>
+        </tr>
+      </thead>
+      <tbody id="sensor-toggles-tbody">
+        <tr>
+          <td colspan="6" class="empty-row">
+            <i class="fas fa-spinner fa-spin" style="margin-right:8px;"></i>Loading sensors…
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
   </main>
 
   <!-- Toast container -->

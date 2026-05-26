@@ -94,10 +94,6 @@
                 FloodGuard
             </div>
             <ul class="nav-menu">
-                <li><a href="index.html" class="nav-link">🏠 Dashboard</a></li>
-                <li><a href="monitoring.html" class="nav-link">📊 Monitoring</a></li>
-                <li><a href="alert.html" class="nav-link">🔔 Alerts</a></li>
-                <li><a href="map.html" class="nav-link">📍 Map</a></li>
                 <li class="profile-dropdown-container">
                     <a href="#" class="nav-link profile-link-toggle">
                         <img src="design/images/profile.png" alt="Profile" class="nav-profile-photo">
@@ -106,15 +102,20 @@
                     <div class="profile-dropdown-menu">
                         <div class="dropdown-header">
                             <img src="design/images/profile.png" alt="Profile" class="dropdown-profile-photo">
-                            <span id="userDisplayName">Welcome <br> User</span>
+                            <span>Welcome <br> User</span>
                         </div>
-                        <a href="#"><i class="fas fa-user-edit icon"></i>Edit Profile</a>
+                        <a href="index.html"><i class="fas fa-home icon"></i>Dashboard</a>
+                        <a href="monitoring.html"><i class="fas fa-chart-line icon"></i>Monitoring</a>
+                        <a href="map.html"><i class="fas fa-map-marker-alt icon"></i>Map</a>
+                        <hr>
+                        <a href="profile.html"><i class="fas fa-user-edit icon"></i>Edit Profile</a>
                         <a href="#"><i class="fas fa-cog icon"></i>Settings</a>
                         <a href="#"><i class="fas fa-user-circle icon"></i>Manage Account</a>
                         <hr>
                         <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt icon"></i>Logout</a>
                     </div>
                 </li>
+            </ul>
         </div>
     </nav>
 

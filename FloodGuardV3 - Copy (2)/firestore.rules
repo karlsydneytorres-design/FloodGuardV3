@@ -18,41 +18,32 @@ service cloud.firestore {
 
     // ── users collection ──────────────────────────────────────
     match /users/{uid} {
-      // Any logged-in user can read their own profile
-      // Admins can read all profiles
       allow read: if isOwner(uid) || isAdmin();
-
-      // Users can create/update their own profile
-      // Admins can update anyone (for role changes)
       allow create: if isOwner(uid);
       allow update: if isOwner(uid) || isAdmin();
-
-      // Only admins can delete user records
       allow delete: if isAdmin();
     }
 
     // ── feedbacks collection ──────────────────────────────────
     match /feedbacks/{docId} {
-      // Only admins can read all feedback
       allow read: if isAdmin();
-
-      // Any logged-in user can submit feedback (create only)
       allow create: if isLoggedIn()
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.rating is int
         && request.resource.data.rating >= 1
         && request.resource.data.rating <= 5;
-
-      // Nobody can edit or delete submitted feedback
       allow update, delete: if false;
     }
 
     // ── sensorConfigs collection ──────────────────────────────
     match /sensorConfigs/{docId} {
-      // Any logged-in user can read sensor configs (needed for map/monitoring)
       allow read: if isLoggedIn();
+      allow write: if isAdmin();
+    }
 
-      // Only admins can create, update, delete sensor configs
+    // ── sensor_toggles collection ─────────────────────────────
+    match /sensor_toggles/{docId} {
+      allow read: if isLoggedIn();
       allow write: if isAdmin();
     }
 

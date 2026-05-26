@@ -8,124 +8,111 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
     .footer {
-    background: rgba(30, 58, 138, 0.95);
-    backdrop-filter: blur(20px);
-    color: white;
-    padding: 40px 0 20px;
-    margin-top: 60px;
-    position: relative;
-    overflow: hidden;
-}
+        background: rgba(30, 58, 138, 0.95);
+        backdrop-filter: blur(20px);
+        color: white;
+        padding: 40px 0 20px;
+        margin-top: 60px;
+        position: relative;
+        overflow: hidden;
+    }
 
-.footer::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: 
-        radial-gradient(circle at 30% 30%, rgba(255,255,255,0.1) 2px, transparent 2px),
-        radial-gradient(circle at 70% 70%, rgba(255,255,255,0.08) 1px, transparent 1px);
-    background-size: 150px 150px, 100px 100px;
-    animation: float 25s infinite linear;
-    pointer-events: none;
-}
+    .footer::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background-image: 
+            radial-gradient(circle at 30% 30%, rgba(255,255,255,0.1) 2px, transparent 2px),
+            radial-gradient(circle at 70% 70%, rgba(255,255,255,0.08) 1px, transparent 1px);
+        background-size: 150px 150px, 100px 100px;
+        animation: float 25s infinite linear;
+        pointer-events: none;
+    }
 
-.footer-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-    position: relative;
-    z-index: 1;
-}
+    .footer-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+        position: relative;
+        z-index: 1;
+    }
 
-.footer-content {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 40px;
-    margin-bottom: 30px;
-}
+    .footer-content {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 40px;
+        margin-bottom: 30px;
+    }
 
-.footer-section h3 {
-    font-size: 1.3rem;
-    font-weight: 700;
-    margin-bottom: 20px;
-    color: #93c5fd;
-}
+    .footer-section h3 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: #93c5fd;
+    }
 
-.footer-section p, .footer-section li {
-    color: rgba(255, 255, 255, 0.8);
-    line-height: 1.6;
-    margin-bottom: 10px;
-}
+    .footer-section p, .footer-section li {
+        color: rgba(255, 255, 255, 0.8);
+        line-height: 1.6;
+        margin-bottom: 10px;
+    }
 
-.footer-section ul {
-    list-style: none;
-}
+    .footer-section ul { list-style: none; }
 
-.footer-section a {
-    color: rgba(255, 255, 255, 0.8);
-    text-decoration: none;
-    transition: color 0.3s ease;
-}
+    .footer-section a {
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
 
-.footer-section a:hover {
-    color: #93c5fd;
-}
+    .footer-section a:hover { color: #93c5fd; }
 
-.footer-bottom {
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-    padding-top: 20px;
-    text-align: center;
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 0.9rem;
-}
+    .footer-bottom {
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+        padding-top: 20px;
+        text-align: center;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.9rem;
+    }
 
-.section-divider {
-    border: none;
-    height: 1px;
-    background: rgba(0, 0, 0, 0.1);
-    margin: 40px 0;
-}
+    .section-divider {
+        border: none;
+        height: 1px;
+        background: rgba(0, 0, 0, 0.1);
+        margin: 40px 0;
+    }
 
-.profile-dropdown-menu {
-    display: none;
-    position: absolute;
-    top: 60px;
-    right: 0;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-    min-width: 220px;
-    z-index: 1000;
-}
+    /* ── Dropdown fix: controlled by JS via style.display ── */
+    .profile-dropdown-menu {
+        display: none;
+        position: absolute;
+        top: 60px;
+        right: 0;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        min-width: 220px;
+        z-index: 1000;
+    }
 
-.profile-dropdown-container {
-    position: relative;
-}
-
-.profile-dropdown-container.active .profile-dropdown-menu {
-    display: block;
-}
-
+    .profile-dropdown-container {
+        position: relative;
+    }
     </style>
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <!-- Logo -->
             <div class="nav-logo">
                 <img src="./design/images/logo.png" alt="FloodGuard Logo" class="logo-image">
                 <span class="logo-text">FloodGuard</span>
             </div>
-    
-            <!-- Hamburger Menu (Mobile) -->
+
             <div class="hamburger" onclick="toggleMenu()">
                 <i class="fas fa-bars"></i>
             </div>
-    
-            <!-- Nav Menu -->
+
             <ul class="nav-menu" id="navMenu">
                 <li class="profile-dropdown-container">
                     <a href="#" class="nav-link profile-link-toggle">
@@ -134,21 +121,18 @@
                     </a>
                     <div class="profile-dropdown-menu">
                         <div class="dropdown-header">
-                            <img src="/design/images/profile.png" alt="Profile" class="dropdown-profile-photo">
                             <span id="userDisplayName">Welcome <br> User</span>
                         </div>
-                        <a href="./admin.html" id="admin-dashboard-link" style="display: none;"><i class="fas fa-user-shield icon"></i>Admin Dashboard</a>
+                        </a>
                         <a href="./profile.html"><i class="fas fa-user-edit icon"></i>Edit Profile</a>
-                        <a href="#"><i class="fas fa-cog icon"></i>Settings</a>
-                        <a href="#"><i class="fas fa-user-circle icon"></i>Manage Account</a>
                         <hr>
-                        <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt icon"></i>Logout</a>
+                        <a href="#" id="logout-link"><i class="fas fa-sign-out-alt icon"></i>Logout</a>
                     </div>
                 </li>
             </ul>
         </div>
     </nav>
-    
+
     <main class="main-content">
         <section class="hero-section">
             <div class="hero-carousel">
@@ -208,268 +192,596 @@
 
         <hr class="section-divider">
 
-                
-                <div class="dashboard-card flood-data-card">
-                    <div class="card-header">
-                        <span class="card-icon">📊</span>
-                        <h3 class="card-title">Real-Time Flood Data</h3>
-                    </div>
-                    <div class="card-content data-grid">
-                        <div class="data-item">
-                            <span class="data-icon">🌊</span>
-                            <div class="data-info">
-                                <span class="data-label">Current Water Level</span>
-                                <span class="data-value">2.1m</span>
-                            </div>
-                        </div>
-                        <div class="data-item">
-                            <span class="data-icon">🌧️</span>
-                            <div class="data-info">
-                                <span class="data-label">Hourly Rainfall</span>
-                                <span class="data-value">0.5mm/hr</span>
-                            </div>
-                        </div>
-                        <div class="data-item">
-                            <span class="data-icon">📡</span>
-                            <div class="data-info">
-                                <span class="data-label">Sensor Status</span>
-                                <span class="data-value status-online">Online</span>
-                            </div>
-                        </div>
-                        <div class="data-item">
-                            <span class="data-icon">☀️</span>
-                            <div class="data-info">
-                                <span class="data-label">Power Status</span>
-                                <span class="data-value status-online">98% Solar</span>
-                            </div>
-                        </div>
-                    </div>
-                    <a href="./monitoring.html" class="card-link">View Detailed Monitoring →</a>
-                </div>
-
-            </section>
-
-            <hr>
-
-            <section class="about-us-section">
-                <div class="about-us-container">
-                    <div class="about-us-content">
-                        <h2 class="about-us-title">About FloodGuard</h2>
-                        <p class="about-us-text">
-                            FloodGuard is a non-profit initiative dedicated to protecting local communities from the devastating effects of flooding.
-                            Our system utilizes a network of advanced sensors to collect real-time data on water levels and rainfall,
-                            providing a crucial early warning system for residents and emergency responders.
-                        </p>
-                        <p class="about-us-text">
-                            We believe that with technology and community cooperation, we can significantly reduce the risks associated with
-                            natural disasters. By providing timely alerts, accurate data, and essential safety information,
-                            we empower the people of Barangay Colgante to stay prepared and safe during challenging weather conditions.
-                        </p>
-                    </div>
-                    <div class="about-us-images">
-                        <div class="about-us-img-card">
-                            <img src="./design/images/sensor.jpeg" alt="Flood-themed image">
-                        </div>
-                        <div class="about-us-img-card">
-                            <img src="./design/images/sensor3.jpeg" alt="Flood-themed image 2">
-                        </div>
-                        <div class="about-us-img-card">
-                            <img src="./design/images/sensor2.jpeg" alt="Flood-themed image 2">
-                        </div>
-                        <div class="about-us-img-card">
-                            <img src="./design/images/sensor4.jpeg" alt="Flood-themed image 2">
-                        </div>
+        <div class="dashboard-card flood-data-card">
+            <div class="card-header">
+                <span class="card-icon">📊</span>
+                <h3 class="card-title">Real-Time Flood Data</h3>
+            </div>
+            <div class="card-content data-grid">
+                <div class="data-item">
+                    <span class="data-icon">🌊</span>
+                    <div class="data-info">
+                        <span class="data-label">Current Water Level</span>
+                        <span class="data-value" id="waterLevel">2.1m</span>
                     </div>
                 </div>
-            </section>
+                <div class="data-item">
+                    <span class="data-icon">🌧️</span>
+                    <div class="data-info">
+                        <span class="data-label">Hourly Rainfall</span>
+                        <span class="data-value" id="rainfallValue">0.5mm/hr</span>
+                    </div>
+                </div>
+                <div class="data-item">
+                    <span class="data-icon">📡</span>
+                    <div class="data-info">
+                        <span class="data-label">Sensor Status</span>
+                        <span class="data-value status-online">Online</span>
+                    </div>
+                </div>
+                <div class="data-item">
+                    <span class="data-icon">☀️</span>
+                    <div class="data-info">
+                        <span class="data-label">Power Status</span>
+                        <span class="data-value status-online">98% Solar</span>
+                    </div>
+                </div>
+            </div>
+            <a href="./monitoring.html" class="card-link">View Detailed Monitoring →</a>
+        </div>
 
-            <hr>
+        <hr>
 
-            <section class="assurance-section">
-                <div class="assurance-content">
-                    <h2 class="assurance-title">🏘️ Barangay Colgante Protected</h2>
-                    <p class="assurance-text">
-                        The residents of Barangay Colgante can rest assured knowing that FloodGuard provides 
-                        round-the-clock protection against flood hazards. Our advanced monitoring system, 
-                        early warning network, and emergency response protocols ensure your community remains 
-                        safe and well-informed during any weather condition.
+        <section class="about-us-section">
+            <div class="about-us-container">
+                <div class="about-us-content">
+                    <h2 class="about-us-title">About FloodGuard</h2>
+                    <p class="about-us-text">
+                        FloodGuard is a non-profit initiative dedicated to protecting local communities from the devastating effects of flooding.
+                        Our system utilizes a network of advanced sensors to collect real-time data on water levels and rainfall,
+                        providing a crucial early warning system for residents and emergency responders.
                     </p>
-                    
-                    <div class="features-grid">
-                        <div class="feature-item">
-                            <span class="feature-icon">🚨</span>
-                            <h4 class="feature-title">Early Warning System</h4>
-                            <p class="feature-description">Instant alerts sent to all Barangay Colgante residents via SMS, mobile app, and community speakers</p>
-                        </div>
-
-                        <div class="feature-item">
-                            <span class="feature-icon">📱</span>
-                            <h4 class="feature-title">Real-Time Updates</h4>
-                            <p class="feature-description">Live flood data, weather forecasts, and safety information specific to your location</p>
-                        </div>
-
-                        <div class="feature-item">
-                            <span class="feature-icon">🗺️</span>
-                            <h4 class="feature-title">Evacuation Routes</h4>
-                            <p class="feature-description">Clear, updated evacuation maps and safe zone locations throughout Barangay Colgante</p>
-                        </div>
-
-                        <div class="feature-item">
-                            <span class="feature-icon">🤝</span>
-                            <h4 class="feature-title">Community Network</h4>
-                            <p class="feature-description">Connected barangay officials, emergency responders, and community volunteers</p>
-                        </div>
+                    <p class="about-us-text">
+                        We believe that with technology and community cooperation, we can significantly reduce the risks associated with
+                        natural disasters. By providing timely alerts, accurate data, and essential safety information,
+                        we empower the people of Barangay Colgante to stay prepared and safe during challenging weather conditions.
+                    </p>
+                </div>
+                <div class="about-us-images">
+                    <div class="about-us-img-card">
+                        <img src="./design/images/sensor.jpeg" alt="Flood-themed image">
+                    </div>
+                    <div class="about-us-img-card">
+                        <img src="./design/images/sensor3.jpeg" alt="Flood-themed image 2">
+                    </div>
+                    <div class="about-us-img-card">
+                        <img src="./design/images/sensor2.jpeg" alt="Flood-themed image 2">
+                    </div>
+                    <div class="about-us-img-card">
+                        <img src="./design/images/sensor4.jpeg" alt="Flood-themed image 2">
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <hr>
+        <hr>
 
-            <!-- Updated Weather and Feedback Section -->
-            <section class="weather-feedback-section">
-                <div class="weather-info-card">
-                    <div class="card-header">
-                        <span class="card-icon">🌤️</span>
-                        <h3 class="card-title">Colgante Weather</h3>
-                        <div class="weather-status-indicator" id="weatherStatus"></div>
+        <section class="assurance-section">
+            <div class="assurance-content">
+                <h2 class="assurance-title">🏘️ Barangay Colgante Protected</h2>
+                <p class="assurance-text">
+                    The residents of Barangay Colgante can rest assured knowing that FloodGuard provides 
+                    round-the-clock protection against flood hazards. Our advanced monitoring system, 
+                    early warning network, and emergency response protocols ensure your community remains 
+                    safe and well-informed during any weather condition.
+                </p>
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <span class="feature-icon">🚨</span>
+                        <h4 class="feature-title">Early Warning System</h4>
+                        <p class="feature-description">Instant alerts sent to all Barangay Colgante residents via SMS, mobile app, and community speakers</p>
                     </div>
-                    <div class="weather-data" id="weatherData">
-                        <div class="weather-loading" style="display: flex; align-items: center; justify-content: center; height: 100px; color: #64748b;">
-                            <i class="fas fa-spinner fa-spin" style="margin-right: 8px;"></i> Loading weather data...
-                        </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">📱</span>
+                        <h4 class="feature-title">Real-Time Updates</h4>
+                        <p class="feature-description">Live flood data, weather forecasts, and safety information specific to your location</p>
                     </div>
-                    <div id="weatherAlert" class="weather-alert" style="display: none;"></div>
+                    <div class="feature-item">
+                        <span class="feature-icon">🗺️</span>
+                        <h4 class="feature-title">Evacuation Routes</h4>
+                        <p class="feature-description">Clear, updated evacuation maps and safe zone locations throughout Barangay Colgante</p>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">🤝</span>
+                        <h4 class="feature-title">Community Network</h4>
+                        <p class="feature-description">Connected barangay officials, emergency responders, and community volunteers</p>
+                    </div>
                 </div>
-                
-                <div class="feedback-info-card">
-                    <div class="card-header">
-                        <span class="card-icon">💬</span>
-                        <h3 class="card-title">Dashboard Feedback</h3>
-                    </div>
-                    <div class="feedback-content">
-                        <p class="feedback-description">Help us improve FloodGuard by sharing your experience with our dashboard. Your feedback is valuable to our community.</p>
-                        <button class="feedback-button" onclick="showRatingModal()">Give Feedback</button>
-                    </div>
-                </div>
-            </section>
+            </div>
+        </section>
 
-            <hr>
-              
-        <div id="ratingModal" class="modal">
-            <div class="modal-content">
-                <span class="close-btn" onclick="closeRatingModal()">&times;</span>
-                <h3 class="modal-title">Rate Your Experience</h3>
-                <p class="modal-subtitle">How helpful was this dashboard?</p>
-                
-                <div class="star-rating">
-                    <span class="star" data-rating="1">★</span>
-                    <span class="star" data-rating="2">★</span>
-                    <span class="star" data-rating="3">★</span>
-                    <span class="star" data-rating="4">★</span>
-                    <span class="star" data-rating="5">★</span>
+        <hr>
+
+        <section class="weather-feedback-section">
+            <div class="weather-info-card">
+                <div class="card-header">
+                    <span class="card-icon">🌤️</span>
+                    <h3 class="card-title">Colgante Weather</h3>
+                    <div class="weather-status-indicator" id="weatherStatus"></div>
                 </div>
-    
-                <form id="feedbackForm" class="feedback-form">
-                    <div class="form-group">
-                        <label for="feedbackQuestion1">How easy was it to find the information you needed?</label>
-                        <select id="feedbackQuestion1" name="easeOfUse">
-                            <option value="">-- Select an option --</option>
-                            <option value="very-easy">Very Easy</option>
-                            <option value="easy">Easy</option>
-                            <option value="neutral">Neutral</option>
-                            <option value="difficult">Difficult</option>
-                            <option value="very-difficult">Very Difficult</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="feedbackQuestion2">Which feature do you find most useful?</label>
-                        <input type="text" id="feedbackQuestion2" name="mostUsefulFeature" placeholder="e.g., Real-time data, Alerts">
-                    </div>
-    
-                    <div class="form-group">
-                        <label for="feedbackQuestion3">What improvements would you like to see?</label>
-                        <textarea id="feedbackQuestion3" name="improvements" rows="4" placeholder="Your suggestions here..."></textarea>
-                    </div>
-    
-                    <div class="form-group">
-                        <label for="email">Enter your email (optional) for a response:</label>
-                        <input type="email" id="email" name="email" placeholder="youremail@example.com">
-                    </div>
-                </form>
-    
-                <div class="rating-feedback-area">
-                    <div class="rating-feedback" id="ratingFeedback">
-                        <div class="feedback-text"></div>
-                        <div class="feedback-message"></div>
+                <div id="weatherData">
+                    <div style="display:flex;align-items:center;justify-content:center;height:100px;color:#64748b;">
+                        <i class="fas fa-spinner fa-spin" style="margin-right:8px;"></i> Loading weather data...
                     </div>
                 </div>
-    
-                <button class="submit-rating-btn" onclick="submitFeedback()">Submit Feedback</button>
+                <div id="weatherAlert" class="weather-alert" style="display:none;"></div>
+            </div>
+
+            <div class="feedback-info-card">
+                <div class="card-header">
+                    <span class="card-icon">💬</span>
+                    <h3 class="card-title">Dashboard Feedback</h3>
+                </div>
+                <div class="feedback-content">
+                    <p class="feedback-description">Help us improve FloodGuard by sharing your experience with our dashboard. Your feedback is valuable to our community.</p>
+                    <button class="feedback-button" onclick="showRatingModal()">Give Feedback</button>
+                </div>
+            </div>
+        </section>
+
+        <hr>
+    </main>
+
+    <!-- Rating Modal -->
+    <div id="ratingModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeRatingModal()">&times;</span>
+            <h3 class="modal-title">Rate Your Experience</h3>
+            <p class="modal-subtitle">How helpful was this dashboard?</p>
+
+            <div class="star-rating">
+                <span class="star" data-rating="1">★</span>
+                <span class="star" data-rating="2">★</span>
+                <span class="star" data-rating="3">★</span>
+                <span class="star" data-rating="4">★</span>
+                <span class="star" data-rating="5">★</span>
+            </div>
+
+            <form id="feedbackForm" class="feedback-form">
+                <div class="form-group">
+                    <label for="feedbackQuestion1">How easy was it to find the information you needed?</label>
+                    <select id="feedbackQuestion1" name="easeOfUse">
+                        <option value="">-- Select an option --</option>
+                        <option value="very-easy">Very Easy</option>
+                        <option value="easy">Easy</option>
+                        <option value="neutral">Neutral</option>
+                        <option value="difficult">Difficult</option>
+                        <option value="very-difficult">Very Difficult</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="feedbackQuestion2">Which feature do you find most useful?</label>
+                    <input type="text" id="feedbackQuestion2" name="mostUsefulFeature" placeholder="e.g., Real-time data, Alerts">
+                </div>
+                <div class="form-group">
+                    <label for="feedbackQuestion3">What improvements would you like to see?</label>
+                    <textarea id="feedbackQuestion3" name="improvements" rows="4" placeholder="Your suggestions here..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="feedbackEmail">Enter your email (optional) for a response:</label>
+                    <input type="email" id="feedbackEmail" name="email" placeholder="youremail@example.com">
+                </div>
+            </form>
+
+            <div class="rating-feedback-area">
+                <div class="rating-feedback" id="ratingFeedback">
+                    <div class="feedback-text"></div>
+                    <div class="feedback-message"></div>
+                </div>
+            </div>
+
+            <button class="submit-rating-btn" onclick="submitFeedback()">Submit Feedback</button>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>🌊 FloodGuard</h3>
+                    <p>Protecting Barangay Colgante through advanced flood monitoring and early warning systems. Your safety is our mission.</p>
+                    <p><strong>📍 Location:</strong> Barangay Colgante</p>
+                    <p><strong>📞 Emergency:</strong> 911</p>
+                </div>
+                <div class="footer-section">
+                    <h3>🔗 Quick Links</h3>
+                    <ul>
+                        <li><a href="#">Dashboard</a></li>
+                        <li><a href="#">Flood Monitoring</a></li>
+                        <li><a href="#">Weather Updates</a></li>
+                        <li><a href="#">Emergency Contacts</a></li>
+                        <li><a href="#">Safety Guidelines</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>📞 Contact Information</h3>
+                    <ul>
+                        <li>📧 info@floodguard.ph</li>
+                        <li>📱 +63 912 345 6789</li>
+                        <li>🏢 Barangay Colgante Hall</li>
+                        <li>⏰ 24/7 Monitoring</li>
+                        <li>🚨 Emergency Hotline: 911</li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>🛡️ Community Safety</h3>
+                    <p>FloodGuard ensures the safety and security of all Barangay Colgante residents through:</p>
+                    <ul>
+                        <li>✓ 24/7 Water Level Monitoring</li>
+                        <li>✓ Weather Pattern Analysis</li>
+                        <li>✓ Emergency Response Coordination</li>
+                        <li>✓ Community Alert Systems</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 FloodGuard - Barangay Colgante Protection System. All rights reserved. | Keeping our community safe, one alert at a time. 🌊💙</p>
             </div>
         </div>
-    
-        <footer class="footer">
-            <div class="footer-container">
-                <div class="footer-content">
-                    <div class="footer-section">
-                        <h3>🌊 FloodGuard</h3>
-                        <p>Protecting Barangay Colgante through advanced flood monitoring and early warning systems. Your safety is our mission.</p>
-                        <p><strong>📍 Location:</strong> Barangay Colgante</p>
-                        <p><strong>📞 Emergency:</strong> 911</p>
-                    </div>
-    
-                    <div class="footer-section">
-                        <h3>🔗 Quick Links</h3>
-                        <ul>
-                            <li><a href="#">Dashboard</a></li>
-                            <li><a href="#">Flood Monitoring</a></li>
-                            <li><a href="#">Weather Updates</a></li>
-                            <li><a href="#">Emergency Contacts</a></li>
-                            <li><a href="#">Safety Guidelines</a></li>
-                        </ul>
-                    </div>
-    
-                    <div class="footer-section">
-                        <h3>📞 Contact Information</h3>
-                        <ul>
-                            <li>📧 info@floodguard.ph</li>
-                            <li>📱 +63 912 345 6789</li>
-                            <li>🏢 Barangay Colgante Hall</li>
-                            <li>⏰ 24/7 Monitoring</li>
-                            <li>🚨 Emergency Hotline: 911</li>
-                        </ul>
-                    </div>
-    
-                    <div class="footer-section">
-                        <h3>🛡️ Community Safety</h3>
-                        <p>FloodGuard ensures the safety and security of all Barangay Colgante residents through:</p>
-                        <ul>
-                            <li>✓ 24/7 Water Level Monitoring</li>
-                            <li>✓ Weather Pattern Analysis</li>
-                            <li>✓ Emergency Response Coordination</li>
-                            <li>✓ Community Alert Systems</li>
-                        </ul>
-                    </div>
-                </div>
-    
-                <div class="footer-bottom">
-                    <p>&copy; 2025 FloodGuard - Barangay Colgante Protection System. All rights reserved. | Keeping our community safe, one alert at a time. 🌊💙</p>
-                </div>
-            </div>
-        </footer>
+    </footer>
 
-        <script type="module">
-            import { auth } from "./js/firebase-config.js";
-            import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
-          
-            onAuthStateChanged(auth, (user) => {
-              if (!user) {
+    <!-- ═══════════════════════════════════════════════════════
+         SCRIPT 1: Firebase auth guard + admin role check
+         (must be type="module" to use ES imports)
+    ════════════════════════════════════════════════════════ -->
+    <script type="module">
+        import { auth, db } from "./js/firebase-config.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
+        // Redirect to login if not authenticated
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
                 window.location.href = "./auth/auth.html";
-              }
+                return;
+            }
+
+            // Set display name in dropdown
+            const nameEl = document.getElementById("userDisplayName");
+            if (nameEl && user.displayName) {
+                nameEl.innerHTML = `Welcome<br><strong>${user.displayName}</strong>`;
+            }
+
+            // Show admin link if user has admin role
+            try {
+                const snap = await getDoc(doc(db, "users", user.uid));
+                if (snap.exists() && snap.data().role === "admin") {
+                    const adminLink = document.getElementById("admin-dashboard-link");
+                    if (adminLink) adminLink.style.display = "flex";
+                }
+            } catch (e) {
+                console.error("Could not fetch user role:", e);
+            }
+        });
+
+        // Logout — exposed to window so the inline onclick can call it
+        window.logout = async function () {
+            if (confirm("Are you sure you want to logout from FloodGuard?")) {
+                document.body.style.transition = "opacity 0.5s ease";
+                document.body.style.opacity = "0";
+                const { logOut } = await import("./js/auth.js");
+                await logOut();
+            }
+        };
+
+        // Wire up the logout link (avoids inline onclick on the anchor)
+        document.getElementById("logout-link")
+            ?.addEventListener("click", (e) => { e.preventDefault(); window.logout(); });
+    </script>
+
+    <!-- ═══════════════════════════════════════════════════════
+         SCRIPT 2: All UI logic (plain script, runs after DOM)
+    ════════════════════════════════════════════════════════ -->
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+
+        // ── Hamburger ─────────────────────────────────────────
+        window.toggleMenu = function () {
+            document.getElementById("navMenu").classList.toggle("active");
+        };
+
+        // ── Profile dropdown (THE FIX) ────────────────────────
+        const toggle    = document.querySelector(".profile-link-toggle");
+        const dropdown  = document.querySelector(".profile-dropdown-menu");
+        const container = document.querySelector(".profile-dropdown-container");
+
+        if (toggle && dropdown && container) {
+            // Toggle open/close on profile icon click
+            toggle.addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const isOpen = dropdown.style.display === "block";
+                dropdown.style.display = isOpen ? "none" : "block";
             });
-        </script>
-       
-        <script src="./js/index.js"></script>
-    </body>
-    </html>
+
+            // Clicks inside the dropdown menu don't close it
+            dropdown.addEventListener("click", (e) => e.stopPropagation());
+
+            // Click anywhere outside closes the dropdown
+            document.addEventListener("click", () => {
+                dropdown.style.display = "none";
+            });
+        }
+
+        // ── Carousel: pause on hover ──────────────────────────
+        const carouselSlides = document.querySelector(".carousel-slides");
+        const heroSection    = document.querySelector(".hero-section");
+
+        if (heroSection && carouselSlides) {
+            heroSection.addEventListener("mouseenter", () => {
+                carouselSlides.style.animationPlayState = "paused";
+            });
+            heroSection.addEventListener("mouseleave", () => {
+                carouselSlides.style.animationPlayState = "running";
+            });
+        }
+
+        // ── Carousel indicators ───────────────────────────────
+        document.querySelectorAll(".indicator").forEach((indicator, index) => {
+            indicator.addEventListener("click", () => {
+                if (!carouselSlides) return;
+                carouselSlides.style.animation = "none";
+                carouselSlides.style.transform = `translateX(${-index * 20}%)`;
+                setTimeout(() => {
+                    carouselSlides.style.animation = "autoSlide 20s infinite";
+                }, 100);
+            });
+        });
+
+        // ── Simulated flood data updates every 30 sec ─────────
+        setInterval(() => {
+            const wl = document.getElementById("waterLevel");
+            if (wl) {
+                const current = parseFloat(wl.textContent) || 2.1;
+                wl.textContent = (current + (Math.random() - 0.5) * 0.1).toFixed(1) + "m";
+            }
+            const rf = document.getElementById("rainfallValue");
+            if (rf) {
+                rf.textContent = (Math.random() * 2).toFixed(1) + "mm/hr";
+            }
+        }, 30000);
+
+        // ── Weather ───────────────────────────────────────────
+        initializeWeather();
+
+        // ── Star rating ───────────────────────────────────────
+        document.querySelectorAll(".star").forEach((star, index) => {
+            star.addEventListener("mouseover", () => {
+                if (!feedbackSubmitted) highlightStars(index + 1);
+            });
+            star.addEventListener("mouseout", () => {
+                if (!feedbackSubmitted) highlightStars(currentRating);
+            });
+            star.addEventListener("click", () => {
+                if (!feedbackSubmitted) {
+                    currentRating = index + 1;
+                    highlightStars(currentRating);
+                    showRatingFeedback();
+                }
+            });
+        });
+
+    }); // end DOMContentLoaded
+
+    // ── Rating / Feedback modal ───────────────────────────────
+    let currentRating     = 0;
+    let feedbackSubmitted = false;
+
+    function showRatingModal() {
+        document.getElementById("ratingModal").style.display = "flex";
+        document.body.classList.add("modal-open");
+    }
+
+    function closeRatingModal() {
+        document.getElementById("ratingModal").style.display = "none";
+        document.body.classList.remove("modal-open");
+        resetFormAndRating();
+    }
+
+    // Close on backdrop click
+    document.addEventListener("click", (e) => {
+        const modal = document.getElementById("ratingModal");
+        if (e.target === modal) closeRatingModal();
+    });
+
+    function highlightStars(rating) {
+        document.querySelectorAll(".star").forEach((star, i) => {
+            star.classList.toggle("active", i < rating);
+        });
+    }
+
+    function showRatingFeedback() {
+        const messages = {
+            1: { text: "Thanks for the feedback!",   message: "We'll work on improving the dashboard experience." },
+            2: { text: "Thanks for the feedback!",   message: "We appreciate your input and will make improvements." },
+            3: { text: "Thank you for rating us!",   message: "We're glad you found the dashboard useful." },
+            4: { text: "Great to hear!",             message: "We're happy FloodGuard is working well for you." },
+            5: { text: "Excellent! Thank you!",      message: "We're thrilled you love using FloodGuard for community safety." }
+        };
+        const fb   = messages[currentRating];
+        const area = document.getElementById("ratingFeedback");
+        area.querySelector(".feedback-text").textContent    = fb.text;
+        area.querySelector(".feedback-message").textContent = fb.message;
+        area.classList.add("show");
+    }
+
+    function submitFeedback() {
+        if (currentRating === 0) {
+            alert("Please select a star rating before submitting.");
+            return;
+        }
+        const filled = Array.from(
+            document.querySelectorAll("#feedbackForm input, #feedbackForm select, #feedbackForm textarea")
+        ).some(el => el.value.trim() !== "");
+
+        if (!filled) {
+            alert("Please fill out at least one feedback question.");
+            return;
+        }
+
+        feedbackSubmitted = true;
+        const btn = document.querySelector(".submit-rating-btn");
+        btn.textContent = "Submitting…";
+        btn.disabled    = true;
+
+        setTimeout(() => {
+            alert("Thank you for your valuable feedback! We have received your submission.");
+            closeRatingModal();
+        }, 1500);
+    }
+
+    function resetFormAndRating() {
+        currentRating     = 0;
+        feedbackSubmitted = false;
+        highlightStars(0);
+        document.getElementById("ratingFeedback")?.classList.remove("show");
+        const btn = document.querySelector(".submit-rating-btn");
+        if (btn) { btn.textContent = "Submit Feedback"; btn.disabled = false; }
+        document.getElementById("feedbackForm")?.reset();
+    }
+
+    // ── Weather system ────────────────────────────────────────
+    let currentWeatherData    = null;
+    let previousWeatherData   = null;
+    let weatherUpdateInterval = null;
+    let isWeatherLoading      = false;
+
+    async function fetchWeather() {
+        if (isWeatherLoading) return;
+        isWeatherLoading = true;
+
+        const lat = 14.9377, lon = 120.7326;
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}`
+            + `&current=temperature_2m,relative_humidity_2m,weather_code,rain,wind_speed_10m,wind_direction_10m,pressure_msl`
+            + `&timezone=Asia%2FManila`;
+
+        try {
+            const res  = await fetch(url);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+
+            previousWeatherData = currentWeatherData;
+            currentWeatherData  = data;
+
+            updateWeatherDisplay(data);
+            if (previousWeatherData) checkWeatherChanges(previousWeatherData, data);
+            updateWeatherStatus("online");
+        } catch (err) {
+            console.error("Weather fetch error:", err);
+            displayWeatherError();
+            updateWeatherStatus("offline");
+        } finally {
+            isWeatherLoading = false;
+        }
+    }
+
+    function updateWeatherDisplay(data) {
+        const c = data.current;
+        const conditions = {
+            0:  { icon: "☀️",  label: "Clear sky",           alert: false },
+            1:  { icon: "🌤️", label: "Mainly clear",         alert: false },
+            2:  { icon: "⛅",  label: "Partly cloudy",        alert: false },
+            3:  { icon: "☁️",  label: "Overcast",             alert: false },
+            45: { icon: "🌫️", label: "Fog",                  alert: true  },
+            48: { icon: "❄️",  label: "Depositing rime fog",  alert: true  },
+            51: { icon: "🌦️", label: "Light drizzle",        alert: false },
+            53: { icon: "🌦️", label: "Moderate drizzle",     alert: false },
+            55: { icon: "🌧️", label: "Dense drizzle",        alert: true  },
+            61: { icon: "🌧️", label: "Light rain",           alert: false },
+            63: { icon: "🌧️", label: "Moderate rain",        alert: true  },
+            65: { icon: "⛈️", label: "Heavy rain",           alert: true  },
+            80: { icon: "🌦️", label: "Light showers",        alert: false },
+            81: { icon: "🌧️", label: "Moderate showers",     alert: true  },
+            82: { icon: "⛈️", label: "Violent showers",      alert: true  },
+            95: { icon: "⚡",  label: "Thunderstorm",         alert: true  },
+            99: { icon: "⛈️", label: "Severe thunderstorm",  alert: true  }
+        };
+
+        const dirs = ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"];
+        const wi   = conditions[c.weather_code] || { icon: "❓", label: "Unknown", alert: false };
+        const dir  = dirs[Math.round(c.wind_direction_10m / 22.5) % 16];
+
+        document.getElementById("weatherData").innerHTML = `
+            <div class="weather-data">
+                <p><span class="weather-icon">🌡️</span> Temperature: <strong>${c.temperature_2m}°C</strong></p>
+                <p><span class="weather-icon">💧</span> Humidity: <strong>${c.relative_humidity_2m}%</strong></p>
+                <p><span class="weather-icon">${wi.icon}</span> Condition: <strong>${wi.label}</strong></p>
+                <p><span class="weather-icon">🌧️</span> Rain: <strong>${c.rain} mm/h</strong></p>
+                <p><span class="weather-icon">💨</span> Wind: <strong>${c.wind_speed_10m} km/h ${dir}</strong></p>
+                <p><span class="weather-icon">🎚️</span> Pressure: <strong>${c.pressure_msl} hPa</strong></p>
+                <p style="font-size:14px;color:rgba(100,116,139,0.9);margin-top:10px;">
+                    <span class="weather-icon">🔄</span> Updated: ${new Date().toLocaleTimeString()}
+                </p>
+            </div>`;
+
+        // Alert logic
+        const alertEl = document.getElementById("weatherAlert");
+        let msg = "";
+        if (c.rain > 5)                  msg = `⚠️ Heavy rainfall (${c.rain} mm/h). Monitor flood levels closely.`;
+        else if (c.wind_speed_10m > 40)  msg = `💨 Strong winds (${c.wind_speed_10m} km/h). Potential storm conditions.`;
+        else if (wi.alert)               msg = `🌩️ ${wi.label} detected. Stay vigilant.`;
+        else if (c.relative_humidity_2m > 90 && c.temperature_2m > 25)
+                                         msg = `🌡️ High humidity and temperature. Severe weather may develop.`;
+        alertEl.innerHTML     = msg;
+        alertEl.style.display = msg ? "block" : "none";
+    }
+
+    function checkWeatherChanges(prev, curr) {
+        if (curr.current.weather_code !== prev.current.weather_code) {
+            const card = document.querySelector(".weather-info-card");
+            if (card) {
+                card.style.transition = "transform 0.4s ease";
+                card.style.transform  = "scale(1.02)";
+                setTimeout(() => { card.style.transform = "scale(1)"; }, 600);
+            }
+        }
+    }
+
+    function displayWeatherError() {
+        document.getElementById("weatherData").innerHTML = `
+            <div style="text-align:center;padding:20px;">
+                <p style="color:#ef4444;">❌ Unable to fetch weather data</p>
+                <p style="font-size:14px;color:#94a3b8;margin-top:4px;">Check your connection and try again.</p>
+                <button onclick="fetchWeather()"
+                    style="background:#1e3a8a;color:white;border:none;padding:8px 16px;
+                           border-radius:6px;margin-top:12px;cursor:pointer;">
+                    Retry
+                </button>
+            </div>`;
+    }
+
+    function updateWeatherStatus(status) {
+        const el = document.getElementById("weatherStatus");
+        if (!el) return;
+        el.style.backgroundColor = status === "online" ? "#22c55e" : "#ef4444";
+        el.style.boxShadow = status === "online"
+            ? "0 0 6px rgba(34,197,94,0.6)"
+            : "0 0 6px rgba(239,68,68,0.6)";
+    }
+
+    function initializeWeather() {
+        fetchWeather();
+        clearInterval(weatherUpdateInterval);
+        // Refresh every 5 minutes
+        weatherUpdateInterval = setInterval(fetchWeather, 300_000);
+        // Extra refresh every 1 minute if it's actively raining
+        setInterval(() => {
+            if (currentWeatherData?.current?.rain > 1) fetchWeather();
+        }, 60_000);
+    }
+
+    window.addEventListener("beforeunload", () => clearInterval(weatherUpdateInterval));
+    </script>
+
+</body>
+</html>

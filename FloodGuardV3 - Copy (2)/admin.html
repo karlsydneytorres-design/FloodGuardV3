@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard — FloodGuard</title>
+  <title>Admin Dashboard — FloodWatch</title>
   <link rel="stylesheet" href="./css/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
@@ -485,8 +485,84 @@
       </table>
     </div>
 
-    <!-- Optional sensor config section (hidden until populated) -->
-    <div id="sensor-configs-list"></div>
+    <!-- AFTER this closing div of the users table -->
+</div>
+
+<!-- Feedback Table — ADD THIS BLOCK -->
+<div style="margin-top: 32px;">
+  <div class="page-header" style="margin-bottom: 16px;">
+    <div class="page-header-left">
+      <h1 style="font-size: 1.5rem;">💬 User Feedback</h1>
+      <p>All dashboard feedback submitted by users</p>
+    </div>
+    <div class="live-badge">
+      <span id="feedback-live-indicator" style="width:9px;height:9px;border-radius:50%;background:#22c55e;display:inline-block;"></span>
+      LIVE
+    </div>
+  </div>
+
+  <!-- Feedback Stats -->
+  <div class="stats-bar" style="grid-template-columns: repeat(4,1fr); margin-bottom: 20px;">
+    <div class="stat-card" style="border-color: #f59e0b;">
+      <span class="stat-label">Total Feedback</span>
+      <span class="stat-value" id="stat-feedback-total">—</span>
+    </div>
+    <div class="stat-card" style="border-color: #22c55e;">
+      <span class="stat-label">Avg Rating</span>
+      <span class="stat-value" id="stat-feedback-avg">—</span>
+    </div>
+    <div class="stat-card" style="border-color: #3b82f6;">
+      <span class="stat-label">5 ⭐ Ratings</span>
+      <span class="stat-value" id="stat-feedback-five">—</span>
+    </div>
+    <div class="stat-card" style="border-color: #ef4444;">
+      <span class="stat-label">1 ⭐ Ratings</span>
+      <span class="stat-value" id="stat-feedback-one">—</span>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <div class="table-toolbar">
+      <div class="search-wrapper">
+        <i class="fas fa-search"></i>
+        <input type="text" id="feedback-search" placeholder="Search by name, email, or feedback…">
+      </div>
+      <select id="feedback-rating-filter">
+        <option value="all">All Ratings</option>
+        <option value="5">⭐⭐⭐⭐⭐ 5 Stars</option>
+        <option value="4">⭐⭐⭐⭐ 4 Stars</option>
+        <option value="3">⭐⭐⭐ 3 Stars</option>
+        <option value="2">⭐⭐ 2 Stars</option>
+        <option value="1">⭐ 1 Star</option>
+      </select>
+    </div>
+
+    <table class="user-table">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Email</th>
+          <th>Rating</th>
+          <th>Ease of Use</th>
+          <th>Most Useful Feature</th>
+          <th>Improvements</th>
+          <th>Contact Email</th>
+          <th>Submitted</th>
+        </tr>
+      </thead>
+      <tbody id="feedback-tbody">
+        <tr>
+          <td colspan="8" class="empty-row">
+            <i class="fas fa-spinner fa-spin" style="margin-right:8px;"></i>Loading feedback…
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- sensor configs stays below -->
+<div id="sensor-configs-list"></div>
 
   </main>
 

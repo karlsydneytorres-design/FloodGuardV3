@@ -1,18 +1,65 @@
-rules_version='2'
-
+rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      // This rule allows anyone with your database reference to view, edit,
-      // and delete all data in your database. It is useful for getting
-      // started, but it is configured to expire after 30 days because it
-      // leaves your app open to attackers. At that time, all client
-      // requests to your database will be denied.
-      //
-      // Make sure to write security rules for your app before that time, or
-      // else all client requests to your database will be denied until you
-      // update your rules.
-      allow read, write: if request.time < timestamp.date(2026, 6, 24);
+
+    // ── Helper functions ──────────────────────────────────────
+    function isLoggedIn() {
+      return request.auth != null;
     }
+
+    function isAdmin() {
+      return isLoggedIn() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin";
+    }
+
+    function isOwner(uid) {
+      return isLoggedIn() && request.auth.uid == uid;
+    }
+
+    // ── users collection ──────────────────────────────────────
+    match /users/{uid} {
+      // Any logged-in user can read their own profile
+      // Admins can read all profiles
+      allow read: if isOwner(uid) || isAdmin();
+
+      // Users can create/update their own profile
+      // Admins can update anyone (for role changes)
+      allow create: if isOwner(uid);
+      allow update: if isOwner(uid) || isAdmin();
+
+      // Only admins can delete user records
+      allow delete: if isAdmin();
+    }
+
+    // ── feedbacks collection ──────────────────────────────────
+    match /feedbacks/{docId} {
+      // Only admins can read all feedback
+      allow read: if isAdmin();
+
+      // Any logged-in user can submit feedback (create only)
+      allow create: if isLoggedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.rating is int
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 5;
+
+      // Nobody can edit or delete submitted feedback
+      allow update, delete: if false;
+    }
+
+    // ── sensorConfigs collection ──────────────────────────────
+    match /sensorConfigs/{docId} {
+      // Any logged-in user can read sensor configs (needed for map/monitoring)
+      allow read: if isLoggedIn();
+
+      // Only admins can create, update, delete sensor configs
+      allow write: if isAdmin();
+    }
+
+    // ── Deny everything else by default ──────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
   }
 }

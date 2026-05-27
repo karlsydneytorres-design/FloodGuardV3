@@ -104,8 +104,12 @@
                 <img src="./design/images/logo.png" alt="FloodGuard Logo" class="logo-image">
                 <span class="logo-text">FloodWatch</span>
             </div>
+
+            <button class="hamburger" aria-label="Toggle navigation" onclick="toggleMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
     
-            <ul class="nav-menu">
+            <ul id="navMenu" class="nav-menu">
                 <li class="profile-dropdown-container">
                     <a href="#" class="nav-link profile-link-toggle">
                         <img src="design/images/profile.png" alt="Profile" class="nav-profile-photo">
@@ -177,11 +181,11 @@
 
         <hr class="section-divider">
 
-                
-                <div class="dashboard-card flood-data-card">
-                    <div class="card-header">
-                        <span class="card-icon">📊</span>
-                        <h3 class="card-title">Real-Time Flood Data</h3>
+        <section class="dashboard-section">
+            <div class="dashboard-card flood-data-card">
+                <div class="card-header">
+                    <span class="card-icon">📊</span>
+                    <h3 class="card-title">Real-Time Flood Data</h3>
                     </div>
                     <div class="card-content data-grid">
                         <div class="data-item">
@@ -215,7 +219,6 @@
                     </div>
                     <a href="./monitoring.html" class="card-link">View Detailed Monitoring →</a>
                 </div>
-
             </section>
 
             <hr>

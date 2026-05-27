@@ -4,7 +4,7 @@
 //  All sensors are OFFLINE (hardware not yet deployed)
 // ============================================================
 
-import { db } from "../js/firebase-config.js";
+import { db } from "./firebase-config.js";
 import {
   doc,
   getDoc,
@@ -415,8 +415,25 @@ function updateTime() {
                  dropdownMenu.classList.remove('show');
              }
          }
+
+         const navMenu = document.getElementById('navMenu');
+         if (navMenu && !event.target.closest('#navMenu') && !event.target.closest('.hamburger')) {
+             navMenu.classList.remove('active');
+         }
      }
  }
+
+function initDropdown() {
+  // page-specific dropdown behavior is handled by inline HTML script;
+  // this fallback ensures the monitoring module does not throw.
+}
+
+function toggleMenu() {
+  const navMenu = document.getElementById('navMenu');
+  if (navMenu) {
+    navMenu.classList.toggle('active');
+  }
+}
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", async () => {

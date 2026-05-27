@@ -13,7 +13,7 @@ import {
 import { doc, setDoc, getDoc, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 
-import { auth, db } from "/js/firebase-config.js";
+import { auth, db } from "./firebase-config.js";
 
 function showError(elementId, message) {
   const el = document.getElementById(elementId);

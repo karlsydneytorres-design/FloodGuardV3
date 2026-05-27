@@ -376,6 +376,26 @@
       .user-table th:nth-child(4),
       .user-table td:nth-child(4) { display: none; } /* hide "Joined" on mobile */
     }
+
+    /* Announcement modal input focus */
+      #ann-input-title:focus,
+      #ann-input-message:focus,
+      #ann-input-priority:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+      }
+
+      #ann-modal[style*="flex"] {
+        display: flex !important;
+      }
+
+      /* Priority badges in table */
+      .ann-badge-high   { background:#fef2f2;color:#dc2626;border:1px solid #fecaca; }
+      .ann-badge-medium { background:#fffbeb;color:#d97706;border:1px solid #fcd34d; }
+      .ann-badge-normal { background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe; }
+
+      .ann-status-active   { background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0; }
+      .ann-status-archived { background:#f9fafb;color:#9ca3af;border:1px solid #e5e7eb; }
   </style>
 </head>
 <body>
@@ -616,6 +636,177 @@
         </tr>
       </tbody>
     </table>
+  </div>
+</div>
+
+<!-- ── Public Announcements Management ─────────────────────── -->
+<div style="margin-top: 32px;">
+  <div class="page-header" style="margin-bottom: 16px;">
+    <div class="page-header-left">
+      <h1 style="font-size: 1.5rem;">📢 Public Announcements</h1>
+      <p>Post, edit, and manage announcements visible to all residents on the dashboard</p>
+    </div>
+    <button id="btn-new-announcement" style="
+      display:inline-flex;align-items:center;gap:8px;
+      padding:10px 20px;background:#1e3a8a;color:white;
+      border:none;border-radius:9px;font-size:0.9rem;
+      font-weight:600;cursor:pointer;transition:background 0.2s;
+    ">
+      <i class="fas fa-plus"></i> New Announcement
+    </button>
+  </div>
+
+  <!-- Announcement Stats -->
+  <div class="stats-bar" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px;">
+    <div class="stat-card" style="border-color:#3b82f6;">
+      <span class="stat-label">Total</span>
+      <span class="stat-value" id="stat-ann-total">—</span>
+    </div>
+    <div class="stat-card" style="border-color:#22c55e;">
+      <span class="stat-label">Active</span>
+      <span class="stat-value" id="stat-ann-active">—</span>
+    </div>
+    <div class="stat-card" style="border-color:#ef4444;">
+      <span class="stat-label">Urgent</span>
+      <span class="stat-value" id="stat-ann-urgent">—</span>
+    </div>
+    <div class="stat-card" style="border-color:#6b7280;">
+      <span class="stat-label">Archived</span>
+      <span class="stat-value" id="stat-ann-archived">—</span>
+    </div>
+  </div>
+
+  <!-- Filter toolbar -->
+  <div class="table-container">
+    <div class="table-toolbar">
+      <div class="search-wrapper">
+        <i class="fas fa-search"></i>
+        <input type="text" id="ann-search" placeholder="Search announcements…">
+      </div>
+      <select id="ann-filter-priority">
+        <option value="all">All Priorities</option>
+        <option value="high">🚨 Urgent</option>
+        <option value="medium">⚠️ Important</option>
+        <option value="normal">📢 Normal</option>
+      </select>
+      <select id="ann-filter-status">
+        <option value="all">All Status</option>
+        <option value="active">Active</option>
+        <option value="archived">Archived</option>
+      </select>
+    </div>
+
+    <table class="user-table">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Message</th>
+          <th>Priority</th>
+          <th>Status</th>
+          <th>Posted By</th>
+          <th>Date Posted</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="ann-tbody">
+        <tr>
+          <td colspan="7" class="empty-row">
+            <i class="fas fa-spinner fa-spin" style="margin-right:8px;"></i>Loading…
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ── Announcement Modal ───────────────────────────────────── -->
+<div id="ann-modal" style="
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);
+  z-index:10000;align-items:center;justify-content:center;
+">
+  <div style="
+    background:white;border-radius:16px;padding:32px;
+    width:100%;max-width:540px;margin:20px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.3);
+    max-height:90vh;overflow-y:auto;
+  ">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+      <h2 id="ann-modal-title" style="font-size:1.3rem;font-weight:800;color:#1e3a8a;">
+        New Announcement
+      </h2>
+      <button onclick="closeAnnouncementModal()" style="
+        background:none;border:none;cursor:pointer;
+        font-size:1.4rem;color:#9ca3af;line-height:1;
+      ">×</button>
+    </div>
+
+    <input type="hidden" id="ann-edit-id">
+
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <div>
+        <label style="font-size:0.82rem;font-weight:700;color:#374151;
+          text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px;">
+          Title <span style="color:#ef4444;">*</span>
+        </label>
+        <input type="text" id="ann-input-title" placeholder="e.g. Flood Advisory – Sulipan Area"
+          maxlength="100"
+          style="width:100%;padding:10px 14px;border:1px solid #e5e7eb;
+            border-radius:8px;font-size:0.95rem;outline:none;
+            transition:border-color 0.2s,box-shadow 0.2s;">
+        <div style="font-size:0.75rem;color:#9ca3af;margin-top:4px;text-align:right;">
+          <span id="ann-title-count">0</span>/100
+        </div>
+      </div>
+
+      <div>
+        <label style="font-size:0.82rem;font-weight:700;color:#374151;
+          text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px;">
+          Message <span style="color:#ef4444;">*</span>
+        </label>
+        <textarea id="ann-input-message" rows="4"
+          placeholder="Write your announcement message here…"
+          maxlength="500"
+          style="width:100%;padding:10px 14px;border:1px solid #e5e7eb;
+            border-radius:8px;font-size:0.95rem;outline:none;resize:vertical;
+            transition:border-color 0.2s,box-shadow 0.2s;font-family:inherit;"></textarea>
+        <div style="font-size:0.75rem;color:#9ca3af;margin-top:4px;text-align:right;">
+          <span id="ann-msg-count">0</span>/500
+        </div>
+      </div>
+
+      <div>
+        <label style="font-size:0.82rem;font-weight:700;color:#374151;
+          text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px;">
+          Priority
+        </label>
+        <select id="ann-input-priority" style="
+          width:100%;padding:10px 14px;border:1px solid #e5e7eb;
+          border-radius:8px;font-size:0.95rem;outline:none;
+          background:white;cursor:pointer;">
+          <option value="normal">📢 Normal — General notice</option>
+          <option value="medium">⚠️ Important — Residents should take note</option>
+          <option value="high">🚨 Urgent — Immediate action may be needed</option>
+        </select>
+      </div>
+
+      <div id="ann-modal-error" style="
+        display:none;background:#fef2f2;border:1px solid #fecaca;
+        color:#dc2626;border-radius:8px;padding:10px 14px;font-size:0.875rem;
+      "></div>
+    </div>
+
+    <div style="display:flex;gap:12px;margin-top:24px;justify-content:flex-end;">
+      <button onclick="closeAnnouncementModal()" style="
+        padding:10px 20px;border:1px solid #e5e7eb;border-radius:8px;
+        background:white;color:#374151;font-size:0.9rem;font-weight:600;cursor:pointer;
+      ">Cancel</button>
+      <button id="ann-submit-btn" onclick="submitAnnouncement()" style="
+        padding:10px 24px;background:#1e3a8a;color:white;border:none;
+        border-radius:8px;font-size:0.9rem;font-weight:600;cursor:pointer;
+        transition:background 0.2s;min-width:120px;
+      ">Post</button>
+    </div>
   </div>
 </div>
 

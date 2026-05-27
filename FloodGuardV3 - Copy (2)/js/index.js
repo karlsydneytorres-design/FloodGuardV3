@@ -1,4 +1,4 @@
-    // Weather data storage and state management
+// Weather data storage and state management
     let currentWeatherData = null;
     let previousWeatherData = null;
     let weatherUpdateInterval = null;

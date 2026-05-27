@@ -35,6 +35,38 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // ── announcements collection ──────────────────────────────
+    match /announcements/{docId} {
+      // Any logged-in user (resident) can read active announcements
+      allow read: if isLoggedIn();
+
+      // Only admins can create — enforce required fields and types
+      allow create: if isAdmin()
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 100
+        && request.resource.data.message is string
+        && request.resource.data.message.size() > 0
+        && request.resource.data.message.size() <= 500
+        && request.resource.data.priority in ["high", "medium", "normal"]
+        && request.resource.data.active == true
+        && request.resource.data.authorUid == request.auth.uid;
+
+      // Only admins can edit — title, message, priority, active flag, and edit metadata
+      allow update: if isAdmin()
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 100
+        && request.resource.data.message is string
+        && request.resource.data.message.size() > 0
+        && request.resource.data.message.size() <= 500
+        && request.resource.data.priority in ["high", "medium", "normal"]
+        && request.resource.data.active is bool;
+
+      // Only admins can permanently delete
+      allow delete: if isAdmin();
+    }
+
     // ── sensorConfigs collection ──────────────────────────────
     match /sensorConfigs/{docId} {
       allow read: if isLoggedIn();

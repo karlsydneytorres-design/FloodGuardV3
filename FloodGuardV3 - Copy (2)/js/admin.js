@@ -530,51 +530,317 @@ window.adminToggleSensor = async function(barangayId, sensorId, enabled) {
   }
 };
 
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-      window.location.href = "/auth/auth.html";
-      return;
-    }
+// ─── Announcements ────────────────────────────────────────────
+import {
+  addDoc, updateDoc as _updateDoc, deleteDoc as _deleteDoc,
+  doc as _doc, where, limit
+} from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 
-    if (adminInitialized) return;
-    adminInitialized = true;
+let allAnnouncements   = [];
+let unsubscribeAnn     = null;
+let currentAdminName   = "Admin";
+let currentAdminEmail  = "";
 
-    const profile = await getUserProfile(user.uid);
-    if (profile?.role !== "admin") {
-      showAccessDenied();
-      return;
-    }
+const PRIORITY_LABELS = {
+  high:   { label: "🚨 Urgent",    cls: "ann-badge-high"   },
+  medium: { label: "⚠️ Important", cls: "ann-badge-medium" },
+  normal: { label: "📢 Normal",    cls: "ann-badge-normal" },
+};
 
-    const nameEl = document.getElementById("userDisplayName");
-    if (nameEl) nameEl.innerHTML = `Welcome<br><strong>${profile.displayName ?? user.email}</strong>`;
+function buildAnnouncementRow(ann) {
+  const p       = PRIORITY_LABELS[ann.priority] ?? PRIORITY_LABELS.normal;
+  const isActive = ann.active !== false;
+  const date    = ann.postedAt?.toDate?.().toLocaleString("en-PH", {
+    month: "short", day: "numeric", year: "numeric",
+    hour: "2-digit", minute: "2-digit"
+  }) ?? "—";
 
-    const adminLink = document.getElementById("admin-dashboard-link");
-    if (adminLink) adminLink.style.display = "flex";
+  // Truncate long messages in table
+  const msgPreview = (ann.message ?? "").length > 80
+    ? ann.message.slice(0, 80) + "…"
+    : (ann.message ?? "—");
 
-    document.getElementById("logout-btn")?.addEventListener("click", async () => {
-      if (unsubscribeSnapshot) unsubscribeSnapshot();
-      if (unsubscribeFeedback) unsubscribeFeedback();
-      const { logOut } = await import("/js/auth.js");
-      logOut();
-    });
+  return `
+    <tr data-ann-id="${ann.id}">
+      <td style="font-weight:600;max-width:180px;">${ann.title ?? "—"}</td>
+      <td style="max-width:220px;color:#4b5563;font-size:0.875rem;"
+          title="${(ann.message ?? "").replace(/"/g,"&quot;")}">${msgPreview}</td>
+      <td>
+        <span class="role-badge ${p.cls}" style="white-space:nowrap;">${p.label}</span>
+      </td>
+      <td>
+        <span class="role-badge ${isActive ? "ann-status-active" : "ann-status-archived"}">
+          ${isActive ? "● Active" : "○ Archived"}
+        </span>
+      </td>
+      <td style="font-size:0.875rem;color:#6b7280;">${ann.postedBy ?? "Admin"}</td>
+      <td style="font-size:0.8rem;color:#9ca3af;white-space:nowrap;">${date}</td>
+      <td>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button onclick="openEditAnnouncement('${ann.id}')"
+            style="padding:5px 12px;border:1px solid #bfdbfe;background:#eff6ff;
+              color:#2563eb;border-radius:6px;font-size:0.8rem;font-weight:600;cursor:pointer;">
+            ✏️ Edit
+          </button>
+          <button onclick="toggleAnnouncementActive('${ann.id}', ${!isActive})"
+            style="padding:5px 12px;border:1px solid ${isActive ? "#fcd34d" : "#bbf7d0"};
+              background:${isActive ? "#fffbeb" : "#f0fdf4"};
+              color:${isActive ? "#d97706" : "#16a34a"};
+              border-radius:6px;font-size:0.8rem;font-weight:600;cursor:pointer;">
+            ${isActive ? "📦 Archive" : "✅ Restore"}
+          </button>
+          <button onclick="deleteAnnouncement('${ann.id}', '${(ann.title ?? "").replace(/'/g,"\\'")}' )"
+            style="padding:5px 12px;border:1px solid #fecaca;background:#fef2f2;
+              color:#dc2626;border-radius:6px;font-size:0.8rem;font-weight:600;cursor:pointer;">
+            🗑 Delete
+          </button>
+        </div>
+      </td>
+    </tr>`;
+}
 
-    initUsersTable(user);
-    initFeedbackTable();
-    initSensorTogglesTable();
+function updateAnnouncementStats(data) {
+  const total    = data.length;
+  const active   = data.filter(a => a.active !== false).length;
+  const urgent   = data.filter(a => a.priority === "high" && a.active !== false).length;
+  const archived = total - active;
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  set("stat-ann-total",    total);
+  set("stat-ann-active",   active);
+  set("stat-ann-urgent",   urgent);
+  set("stat-ann-archived", archived);
+}
 
-    const sensorList = document.getElementById("sensor-configs-list");
-    if (sensorList) {
-      try {
-        const configs = await getAllSensorConfigs();
-        sensorList.innerHTML = configs.map(s => `
-          <div class="sensor-config-card">
-            <strong>${s.id}</strong>
-            <span>📍 ${s.location ?? "N/A"}</span>
-            <span>🚨 Threshold: ${s.alertThreshold ?? "N/A"} cm</span>
-          </div>
-        `).join("") || "<p>No sensor configs found.</p>";
-      } catch (err) {
-        sensorList.innerHTML = "<p>Failed to load sensor configs.</p>";
-      }
-    }
+function renderAnnouncementsTable() {
+  const tbody    = document.getElementById("ann-tbody");
+  if (!tbody) return;
+  const search   = (document.getElementById("ann-search")?.value ?? "").toLowerCase();
+  const priority = document.getElementById("ann-filter-priority")?.value ?? "all";
+  const status   = document.getElementById("ann-filter-status")?.value ?? "all";
+
+  const filtered = allAnnouncements.filter(a => {
+    const matchSearch   = !search
+      || (a.title   ?? "").toLowerCase().includes(search)
+      || (a.message ?? "").toLowerCase().includes(search)
+      || (a.postedBy ?? "").toLowerCase().includes(search);
+    const matchPriority = priority === "all" || a.priority === priority;
+    const isActive      = a.active !== false;
+    const matchStatus   = status === "all"
+      || (status === "active" && isActive)
+      || (status === "archived" && !isActive);
+    return matchSearch && matchPriority && matchStatus;
   });
+
+  updateAnnouncementStats(allAnnouncements);
+
+  tbody.innerHTML = filtered.length
+    ? filtered.map(buildAnnouncementRow).join("")
+    : `<tr><td colspan="7" class="empty-row">No announcements found.</td></tr>`;
+}
+
+function initAnnouncementsTable() {
+  if (unsubscribeAnn) { unsubscribeAnn(); unsubscribeAnn = null; }
+
+  const q = query(
+    collection(db, "announcements"),
+    orderBy("postedAt", "desc"),
+    limit(100)
+  );
+
+  unsubscribeAnn = onSnapshot(q, snap => {
+    allAnnouncements = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderAnnouncementsTable();
+  }, err => {
+    console.error("Announcements listener error:", err);
+    showToast("Failed to load announcements.", "error");
+  });
+
+  document.getElementById("ann-search")?.addEventListener("input",  renderAnnouncementsTable);
+  document.getElementById("ann-filter-priority")?.addEventListener("change", renderAnnouncementsTable);
+  document.getElementById("ann-filter-status")?.addEventListener("change",   renderAnnouncementsTable);
+
+  // New announcement button
+  document.getElementById("btn-new-announcement")?.addEventListener("click", () => {
+    openNewAnnouncement();
+  });
+
+  // Character counters
+  document.getElementById("ann-input-title")?.addEventListener("input", function() {
+    document.getElementById("ann-title-count").textContent = this.value.length;
+  });
+  document.getElementById("ann-input-message")?.addEventListener("input", function() {
+    document.getElementById("ann-msg-count").textContent = this.value.length;
+  });
+
+  // Close modal on backdrop click
+  document.getElementById("ann-modal")?.addEventListener("click", function(e) {
+    if (e.target === this) closeAnnouncementModal();
+  });
+}
+
+// ── Modal helpers ──────────────────────────────────────────────
+window.openNewAnnouncement = function() {
+  document.getElementById("ann-modal-title").textContent  = "📢 New Announcement";
+  document.getElementById("ann-edit-id").value            = "";
+  document.getElementById("ann-input-title").value        = "";
+  document.getElementById("ann-input-message").value      = "";
+  document.getElementById("ann-input-priority").value     = "normal";
+  document.getElementById("ann-title-count").textContent  = "0";
+  document.getElementById("ann-msg-count").textContent    = "0";
+  document.getElementById("ann-submit-btn").textContent   = "Post";
+  document.getElementById("ann-modal-error").style.display = "none";
+  document.getElementById("ann-modal").style.display      = "flex";
+};
+
+window.openEditAnnouncement = function(id) {
+  const ann = allAnnouncements.find(a => a.id === id);
+  if (!ann) return;
+  document.getElementById("ann-modal-title").textContent  = "✏️ Edit Announcement";
+  document.getElementById("ann-edit-id").value            = id;
+  document.getElementById("ann-input-title").value        = ann.title ?? "";
+  document.getElementById("ann-input-message").value      = ann.message ?? "";
+  document.getElementById("ann-input-priority").value     = ann.priority ?? "normal";
+  document.getElementById("ann-title-count").textContent  = (ann.title ?? "").length;
+  document.getElementById("ann-msg-count").textContent    = (ann.message ?? "").length;
+  document.getElementById("ann-submit-btn").textContent   = "Save Changes";
+  document.getElementById("ann-modal-error").style.display = "none";
+  document.getElementById("ann-modal").style.display      = "flex";
+};
+
+window.closeAnnouncementModal = function() {
+  document.getElementById("ann-modal").style.display = "none";
+};
+
+window.submitAnnouncement = async function() {
+  const editId   = document.getElementById("ann-edit-id").value.trim();
+  const title    = document.getElementById("ann-input-title").value.trim();
+  const message  = document.getElementById("ann-input-message").value.trim();
+  const priority = document.getElementById("ann-input-priority").value;
+  const errorBox = document.getElementById("ann-modal-error");
+  const submitBtn = document.getElementById("ann-submit-btn");
+
+  // Validation
+  if (!title) {
+    errorBox.textContent = "Title is required.";
+    errorBox.style.display = "block";
+    document.getElementById("ann-input-title").focus();
+    return;
+  }
+  if (!message) {
+    errorBox.textContent = "Message is required.";
+    errorBox.style.display = "block";
+    document.getElementById("ann-input-message").focus();
+    return;
+  }
+  errorBox.style.display = "none";
+
+  submitBtn.disabled    = true;
+  submitBtn.textContent = editId ? "Saving…" : "Posting…";
+
+  try {
+    if (editId) {
+      // ── Update existing ──────────────────────────────────────
+      await updateDoc(doc(db, "announcements", editId), {
+        title, message, priority,
+        editedAt: serverTimestamp(),
+        editedBy: currentAdminName,
+      });
+      showToast("Announcement updated successfully.");
+    } else {
+      // ── Create new ───────────────────────────────────────────
+      await addDoc(collection(db, "announcements"), {
+        title,
+        message,
+        priority,
+        active:    true,
+        postedAt:  serverTimestamp(),
+        postedBy:  currentAdminName,
+        authorUid: auth.currentUser?.uid ?? "",
+      });
+      showToast("Announcement posted successfully! 📢");
+    }
+    closeAnnouncementModal();
+  } catch (err) {
+    console.error("Announcement submit error:", err);
+    errorBox.textContent   = "Failed to save. Please try again.";
+    errorBox.style.display = "block";
+    submitBtn.disabled     = false;
+    submitBtn.textContent  = editId ? "Save Changes" : "Post";
+  }
+};
+
+window.toggleAnnouncementActive = async function(id, newActive) {
+  try {
+    await updateDoc(doc(db, "announcements", id), { active: newActive });
+    showToast(newActive ? "Announcement restored and now visible to users." : "Announcement archived.");
+  } catch (err) {
+    console.error(err);
+    showToast("Failed to update announcement.", "error");
+  }
+};
+
+window.deleteAnnouncement = async function(id, title) {
+  if (!confirm(`Permanently delete "${title}"?\n\nThis cannot be undone.`)) return;
+  try {
+    await deleteDoc(doc(db, "announcements", id));
+    showToast(`"${title}" deleted.`);
+  } catch (err) {
+    console.error(err);
+    showToast("Failed to delete announcement.", "error");
+  }
+};
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    window.location.href = "/auth/auth.html";
+    return;
+  }
+
+  if (adminInitialized) return;
+  adminInitialized = true;
+
+  const profile = await getUserProfile(user.uid);
+  if (profile?.role !== "admin") {
+    showAccessDenied();
+    return;
+  }
+
+  // ── Store admin identity for announcement authorship ──
+  currentAdminName  = profile.displayName ?? user.email ?? "Admin";
+  currentAdminEmail = user.email ?? "";
+
+  const nameEl = document.getElementById("userDisplayName");
+  if (nameEl) nameEl.innerHTML = `Welcome<br><strong>${profile.displayName ?? user.email}</strong>`;
+
+  const adminLink = document.getElementById("admin-dashboard-link");
+  if (adminLink) adminLink.style.display = "flex";
+
+  document.getElementById("logout-btn")?.addEventListener("click", async () => {
+    if (unsubscribeSnapshot) unsubscribeSnapshot();
+    if (unsubscribeFeedback) unsubscribeFeedback();
+    if (unsubscribeAnn)      unsubscribeAnn();        // ← clean up announcements listener
+    const { logOut } = await import("/js/auth.js");
+    logOut();
+  });
+
+  initUsersTable(user);
+  initFeedbackTable();
+  initSensorTogglesTable();
+  initAnnouncementsTable();                           // ← start announcements live sync
+
+  const sensorList = document.getElementById("sensor-configs-list");
+  if (sensorList) {
+    try {
+      const configs = await getAllSensorConfigs();
+      sensorList.innerHTML = configs.map(s => `
+        <div class="sensor-config-card">
+          <strong>${s.id}</strong>
+          <span>📍 ${s.location ?? "N/A"}</span>
+          <span>🚨 Threshold: ${s.alertThreshold ?? "N/A"} cm</span>
+        </div>
+      `).join("") || "<p>No sensor configs found.</p>";
+    } catch (err) {
+      sensorList.innerHTML = "<p>Failed to load sensor configs.</p>";
+    }
+  }
+});

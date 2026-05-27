@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FloodWatch - Barangay Colgante Dashboard</title>
+    <script>document.documentElement.style.visibility = "hidden";</script>
     <link rel="stylesheet" href="./css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -241,7 +242,7 @@
                         <a href="#"><i class="fas fa-cog icon"></i>Settings</a>
                         <a href="#"><i class="fas fa-user-circle icon"></i>Manage Account</a>
                         <hr>
-                        <a href="./auth/auth.html" onclick="logout()"><i class="fas fa-sign-out-alt icon"></i>Logout</a>
+                        <a href="#" onclick="logout(); return false;"><i class="fas fa-sign-out-alt icon"></i>Logout</a>
                     </div>
                 </li>
             </ul>
@@ -565,14 +566,48 @@
 
         <script type="module">
             import { auth, db } from "./js/firebase-config.js";
-            import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+            import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
             import {
                 collection, addDoc, serverTimestamp,
                 query, orderBy, limit, onSnapshot, where
             } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
         
-            // ── Auth guard ──────────────────────────────────────────────
+            // ── Auth guard — runs before anything else ──────────────────
             let currentUser = null;
+            let appInitialized = false;
+        
+            onAuthStateChanged(auth, (user) => {
+                // Always reveal the page
+                document.documentElement.style.visibility = "visible";
+        
+                if (!user) {
+                    // Signed out — go to auth
+                    window.location.replace('/auth/auth.html');
+                    return;
+                }
+        
+                if (appInitialized) return;
+                appInitialized = true;
+        
+                currentUser = user;
+                initAnnouncements();
+            });
+        
+            // ── Override logout to also call Firebase signOut directly ──
+            // This avoids the dynamic import race condition
+            window.logout = async function () {
+                if (confirm('Are you sure you want to logout from FloodGuard?')) {
+                    document.body.style.transition = 'opacity 0.5s ease';
+                    document.body.style.opacity    = '0';
+                    try {
+                        await signOut(auth);
+                        window.location.replace('/auth/auth.html');
+                    } catch (err) {
+                        console.error('Logout error:', err);
+                        window.location.replace('/auth/auth.html');
+                    }
+                }
+            };
         
             // ── Announcements ───────────────────────────────────────────
             function renderAnnouncements(docs) {
@@ -629,7 +664,7 @@
                 );
             }
         
-            // ── Expose submitFeedback globally ──────────────────────────
+            // ── Feedback ────────────────────────────────────────────────
             window.submitFeedback = async function () {
                 if (currentRating === 0) {
                     showNotification('Please select a star rating before submitting.');
@@ -664,7 +699,7 @@
                         page:              "dashboard"
                     });
         
-                    showNotification('Thank you for your valuable feedback! We have received your submission.');
+                    showNotification('Thank you for your valuable feedback!');
                     closeRatingModal();
                     resetFormAndRating();
         
@@ -676,16 +711,6 @@
                     submitBtn.disabled = false;
                 }
             };
-        
-            // ── Single onAuthStateChanged — handles everything ──────────
-            onAuthStateChanged(auth, (user) => {
-                if (!user) {
-                    window.location.href = "./auth/auth.html";
-                    return;
-                }
-                currentUser = user;
-                initAnnouncements();
-            });
         </script>
        
         <script src="./js/index.js"></script>

@@ -301,14 +301,20 @@
     }
 
     // ── Logout ────────────────────────────────────────────────────
-    async function logout() {
-        if (confirm('Are you sure you want to logout from FloodGuard?')) {
-            document.body.style.transition = 'opacity 0.5s ease';
-            document.body.style.opacity    = '0';
+// ── Logout ────────────────────────────────────────────────────
+window.logout = async function () {
+    if (confirm('Are you sure you want to logout from FloodGuard?')) {
+        document.body.style.transition = 'opacity 0.5s ease';
+        document.body.style.opacity    = '0';
+        try {
             const { logOut } = await import('./js/auth.js');
             await logOut();
+        } catch (err) {
+            console.error('Logout error:', err);
+            window.location.replace('/auth/auth.html');
         }
     }
+};
 
     // ── Flood data simulation ─────────────────────────────────────
     function updateFloodData() {

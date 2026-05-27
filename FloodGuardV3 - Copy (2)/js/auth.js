@@ -76,10 +76,11 @@ export async function logIn(email, password) {
 
 export async function logOut() {
   try {
-    await signOut(auth);
-    window.location.href = "/auth/auth.html";
+      await signOut(auth);
+      window.location.replace("/auth/auth.html");
   } catch (error) {
-    console.error("Logout error:", error);
+      console.error("Logout error:", error);
+      window.location.replace("/auth/auth.html");
   }
 }
 
@@ -94,18 +95,28 @@ export function requireAuth(callback) {
 }
 
 export function redirectIfLoggedIn() {
-  // visibility is already hidden from the <head> script
   onAuthStateChanged(auth, async (user) => {
-    if (!user || window._isRegistering) {
-      document.documentElement.style.visibility = "visible"; // show the page
-      return;
-    }
-    try {
-      await redirectByRole(user);
-    } catch (err) {
-      console.error("Role fetch failed:", err);
-      window.location.href = "/index.html";
-    }
+      if (!user) {
+          document.documentElement.style.visibility = "visible";
+          return;
+      }
+
+      // Wait for Firebase to fully settle the auth state
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Re-check after the delay — user may have just logged out
+      const freshUser = auth.currentUser;
+      if (!freshUser) {
+          document.documentElement.style.visibility = "visible";
+          return;
+      }
+
+      try {
+          await freshUser.getIdToken(true);
+          await redirectByRole(freshUser);
+      } catch (err) {
+          document.documentElement.style.visibility = "visible";
+      }
   });
 }
 

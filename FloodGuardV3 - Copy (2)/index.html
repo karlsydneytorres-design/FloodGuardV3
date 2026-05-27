@@ -226,12 +226,12 @@
             <ul id="navMenu" class="nav-menu">
                 <li class="profile-dropdown-container">
                     <a href="#" class="nav-link profile-link-toggle">
-                        <img src="design/images/profile.png" alt="Profile" class="nav-profile-photo">
+                        <div style="width:38px;height:38px;border-radius:50%;background:#1e3a8a;color:white;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;" id="navAvatar">U</div>
                         <i class="fas fa-chevron-down profile-chevron"></i>
                     </a>
                     <div class="profile-dropdown-menu">
                         <div class="dropdown-header">
-                            <img src="design/images/profile.png" alt="Profile" class="dropdown-profile-photo">
+                            <div style="width:48px;height:48px;border-radius:50%;background:#1e3a8a;color:white;display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:700;" id="dropdownAvatar">U</div>
                             <span>Welcome <br> User</span>
                         </div>
                         <a href="index.html"><i class="fas fa-home icon"></i>Dashboard</a>
@@ -587,12 +587,17 @@
 
             currentUser = user;
 
-            // ── Update welcome name ──────────────────────────────────
+            // ── Update avatar & welcome name ─────────────────────────
+            const firstName = (user.displayName || user.email || 'User').split(/[\s@]/)[0];
+
+            const navAvatar = document.getElementById('navAvatar');
+            if (navAvatar) navAvatar.textContent = firstName.charAt(0).toUpperCase();
+
+            const dropdownAvatar = document.getElementById('dropdownAvatar');
+            if (dropdownAvatar) dropdownAvatar.textContent = firstName.charAt(0).toUpperCase();
+
             const welcomeEl = document.querySelector('.dropdown-header span');
-            if (welcomeEl) {
-                const name = user.displayName || user.email || 'User';
-                welcomeEl.innerHTML = `Welcome <br> ${name}`;
-            }
+            if (welcomeEl) welcomeEl.innerHTML = `Welcome <br> ${firstName}`;
 
             initAnnouncements();
         });

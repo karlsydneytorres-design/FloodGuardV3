@@ -42,7 +42,14 @@ onAuthStateChanged(auth, async (user) => {
     if (avatarEl)  avatarEl.textContent  = firstName.charAt(0).toUpperCase();
     if (displayEl) displayEl.textContent = name || 'User';
     if (roleEl)    roleEl.textContent    = role.charAt(0).toUpperCase() + role.slice(1);
-
+    
+    // Navbar & dropdown avatars
+    const navAvatar = document.getElementById('navAvatar');
+    if (navAvatar) navAvatar.textContent = firstName.charAt(0).toUpperCase();
+    
+    const dropdownAvatar = document.getElementById('dropdownAvatar');
+    if (dropdownAvatar) dropdownAvatar.textContent = firstName.charAt(0).toUpperCase();
+    
     // Welcome dropdown
     const welcomeEl = document.querySelector('.dropdown-header span');
     if (welcomeEl) welcomeEl.innerHTML = `Welcome <br> ${firstName}`;

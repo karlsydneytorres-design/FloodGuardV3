@@ -96,12 +96,12 @@
             <ul id="navMenu" class="nav-menu">
                 <li class="profile-dropdown-container">
                     <a href="#" class="nav-link profile-link-toggle">
-                        <img src="design/images/profile.png" alt="Profile" class="nav-profile-photo">
+                        <div style="width:48px;height:48px;border-radius:50%;background:#1e3a8a;color:white;display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:700;" id="dropdownAvatar">U</div>
                         <i class="fas fa-chevron-down profile-chevron"></i>
                     </a>
                     <div class="profile-dropdown-menu">
                         <div class="dropdown-header">
-                            <img src="design/images/profile.png" alt="Profile" class="dropdown-profile-photo">
+                            <div style="width:48px;height:48px;border-radius:50%;background:#1e3a8a;color:white;display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:700;" id="dropdownAvatarInner">U</div>
                             <span>Welcome <br> User</span>
                         </div>
                         <a href="index.html"><i class="fas fa-home icon"></i>Dashboard</a>
@@ -252,20 +252,25 @@
     
         // ── Auth guard ──────────────────────────────────────────────
         onAuthStateChanged(auth, (user) => {
-            document.documentElement.style.visibility = "visible";
-    
-            if (!user) {
-                window.location.replace('/auth/auth.html');
-                return;
-            }
-    
-            // ── Update welcome name ─────────────────────────────────
-            const welcomeEl = document.querySelector('.dropdown-header span');
-            if (welcomeEl) {
-                const name = user.displayName || user.email || 'User';
-                welcomeEl.innerHTML = `Welcome <br> ${name}`;
-            }
-        });
+    document.documentElement.style.visibility = "visible";
+
+    if (!user) {
+        window.location.replace('/auth/auth.html');
+        return;
+    }
+
+    // ── Update welcome name ─────────────────────────────────
+    const firstName = (user.displayName || user.email || 'User').split(/[\s@]/)[0];
+
+    const avatarEl = document.getElementById('dropdownAvatar');
+if (avatarEl) avatarEl.textContent = firstName.charAt(0).toUpperCase();
+
+const avatarInnerEl = document.getElementById('dropdownAvatarInner'); // ← add this
+if (avatarInnerEl) avatarInnerEl.textContent = firstName.charAt(0).toUpperCase(); // ← and this
+
+    const welcomeEl = document.querySelector('.dropdown-header span');
+    if (welcomeEl) welcomeEl.innerHTML = `Welcome <br> ${firstName}`;
+});
     
         // ── Logout ──────────────────────────────────────────────────
         window.logout = async function () {

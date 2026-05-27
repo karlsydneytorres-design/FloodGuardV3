@@ -809,8 +809,17 @@ onAuthStateChanged(auth, async (user) => {
   currentAdminName  = profile.displayName ?? user.email ?? "Admin";
   currentAdminEmail = user.email ?? "";
 
+  const firstName = (profile.displayName || user.email || 'User').split(/[\s@]/)[0];
+
+  const navAvatar = document.getElementById('navAvatar');
+  if (navAvatar) navAvatar.textContent = firstName.charAt(0).toUpperCase();
+  
+  const dropdownAvatar = document.getElementById('dropdownAvatar');
+  if (dropdownAvatar) dropdownAvatar.textContent = firstName.charAt(0).toUpperCase();
+  
   const nameEl = document.getElementById("userDisplayName");
-  if (nameEl) nameEl.innerHTML = `Welcome<br><strong>${profile.displayName ?? user.email}</strong>`;
+  
+  if (nameEl) nameEl.innerHTML = `Welcome<br><strong>${firstName}</strong>`;
 
   const adminLink = document.getElementById("admin-dashboard-link");
   if (adminLink) adminLink.style.display = "flex";

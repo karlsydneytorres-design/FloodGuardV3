@@ -19,7 +19,7 @@ const BARANGAYS = [
       name:     "Barangay Sulipan",
       location: "Apalit, Pampanga",
       sensors: [
-        { id: "WLM-001", type: "Water Level & Rainfall", icon: "💧" }
+        { id: "WLM-001", type: "Water Level" , icon: "💧" }
       ]
     },
     {
@@ -323,7 +323,7 @@ function buildOfflineChart() {
     ">
       <span style="width:8px;height:8px;border-radius:50%;background:#ef4444;
         display:inline-block;animation:pulse 1.5s infinite;"></span>
-      <span style="color:#64748b;font-size:13px;">0 / 9 sensors online</span>
+      <span style="color:#64748b;font-size:13px;">0 / 3 sensors online</span>
     </div>
     <style>
       @keyframes pulse {

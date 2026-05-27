@@ -95,6 +95,35 @@ body::before {
     list-style: none;
 }
 
+.nav-menu li {
+    list-style: none;
+}
+
+.nav-menu.active {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: absolute;
+    top: 100%;
+    right: 20px;
+    left: 20px;
+    background: rgba(255, 255, 255, 0.96);
+    border-radius: 18px;
+    padding: 1rem 1.2rem;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    z-index: 120;
+}
+
+.hamburger {
+    display: none;
+    font-size: 1.8rem;
+    color: #1e40af;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
 .nav-link {
     color: #374151;
     text-decoration: none;
@@ -317,6 +346,12 @@ body::before {
     gap: 1.5rem;
     margin-top: 2rem;
     text-align: left;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2rem;
 }
 
 .panel {
@@ -589,8 +624,222 @@ body::before {
     font-size: 0.9rem;
 }
 
+@media (max-width: 992px) {
+    .container {
+        padding: 1.5rem;
+    }
+
+    .header-section h1 {
+        font-size: 2.8rem;
+    }
+
+    .header-section p {
+        font-size: 1.1rem;
+        max-width: 100%;
+    }
+
+    .map-section {
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+    }
+
+    .map-section h2 {
+        font-size: 1.8rem;
+    }
+
+    .map-container {
+        aspect-ratio: 4 / 3;
+    }
+
+    .map-legend {
+        top: auto;
+        bottom: 20px;
+        right: 20px;
+        left: auto;
+    }
+
+    .sensor-signal {
+        width: 22px;
+        height: 22px;
+        font-size: 0.75rem;
+    }
+
+    .sensor-status-grid {
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .nav-container {
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .hamburger {
+        display: block;
+    }
+
+    .nav-menu {
+        display: none;
+        width: 100%;
+    }
+
+    .nav-menu.active {
+        display: flex;
+    }
+
+    .nav-menu li {
+        width: 100%;
+    }
+
+    .nav-link,
+    .logout-btn {
+        width: 100%;
+        padding: 12px 16px;
+        text-align: left;
+    }
+
+    .profile-dropdown-menu {
+        min-width: auto;
+        width: calc(100vw - 40px);
+        right: 0;
+        left: 0;
+    }
+
+    .header-section h1 {
+        font-size: 2.2rem;
+    }
+
+    .header-section p {
+        font-size: 1rem;
+    }
+
+    .map-section {
+        padding: 1.2rem;
+    }
+
+    .map-container {
+        aspect-ratio: 1 / 1;
+    }
+
+    .info-panel {
+        margin-top: 1.25rem;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .panel {
+        padding: 1rem;
+    }
+
+    .panel-header {
+        font-size: 1.35rem;
+    }
+
+    .panel-list-item {
+        gap: 12px;
+        font-size: 0.95rem;
+    }
+
+    .footer {
+        padding: 30px 0 20px;
+    }
+
+    .footer-container {
+        padding: 0 16px;
+    }
+
+    .footer-content {
+        gap: 25px;
+    }
+}
+
+@media (max-width: 576px) {
+    .container {
+        padding: 1rem;
+    }
+
+    .nav-container {
+        padding: 0 10px;
+    }
+
+    .map-section {
+        margin: 1rem 0;
+    }
+
+    .map-section h2 {
+        font-size: 1.5rem;
+    }
+
+    .map-legend {
+        bottom: 15px;
+        right: 15px;
+        padding: 12px;
+    }
+
+    .sensor-signal {
+        width: 20px;
+        height: 20px;
+        font-size: 0.7rem;
+    }
+
+    .panel {
+        padding: 1rem;
+    }
+
+    .footer-bottom {
+        font-size: 0.85rem;
+    }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
+    .nav-container {
+        flex-direction: column;
+        align-items: flex-start;
+        position: relative;
+        gap: 10px;
+    }
+
+    .hamburger {
+        display: block;
+        position: absolute;
+        right: 20px;
+        top: 20px;
+        z-index: 110;
+    }
+
+    .nav-menu {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.97);
+        padding: 10px 0;
+        border-top: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 0 0 20px 20px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    }
+
+    .nav-menu.active {
+        display: flex;
+    }
+
+    .nav-menu li {
+        width: 100%;
+    }
+
+    .nav-link {
+        width: 100%;
+        justify-content: space-between;
+        padding: 12px 20px;
+        border-radius: 0;
+    }
+
     .nav-menu { gap: 15px; }
     .nav-link { font-size: 0.9rem; padding: 6px 12px; }
     .header-section h1 { font-size: 2.5rem; }
@@ -598,6 +847,34 @@ body::before {
     .map-section h2 { font-size: 1.5rem; }
     .map-container { aspect-ratio: 4/3; }
     .sensor-status-grid { grid-template-columns: 1fr; }
+
+    .profile-dropdown-menu {
+        position: static;
+        width: 100%;
+        margin-top: 8px;
+        opacity: 1;
+        visibility: hidden;
+        transform: none;
+        box-shadow: none;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.98);
+        padding: 10px 0;
+    }
+
+    .profile-dropdown-menu.show {
+        visibility: visible;
+    }
+
+    .profile-dropdown-menu a {
+        padding: 12px 20px;
+    }
+
+    .dropdown-header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 15px 20px;
+    }
 }
 
 @media (max-width: 480px) {

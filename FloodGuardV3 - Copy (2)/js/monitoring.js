@@ -27,7 +27,7 @@ const BARANGAYS = [
       name:     "Barangay Paligui",
       location: "Apalit, Pampanga",
       sensors: [
-        { id: "WLM-002", type: "Water Level & Rainfall", icon: "💧" }
+        { id: "WLM-002", type: "Water Level", icon: "💧" }
       ]
     },
     {
@@ -35,7 +35,7 @@ const BARANGAYS = [
       name:     "Barangay San Vicente",
       location: "Apalit, Pampanga",
       sensors: [
-        { id: "WLM-003", type: "Water Level & Rainfall", icon: "💧" }
+        { id: "WLM-003", type: "Water Level", icon: "💧" }
       ]
     }
   ];

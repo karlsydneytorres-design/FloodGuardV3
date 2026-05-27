@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FloodWatch - Barangay Colgante Dashboard</title>
+    <title>FloodWatch - Dashboard</title>
     <script>document.documentElement.style.visibility = "hidden";</script>
     <link rel="stylesheet" href="./css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -205,6 +205,134 @@
     text-align: center;
     color: #64748b;
     padding: 32px 16px;
+}
+
+/* ─────────────────────────────────────────
+   MATCH CARD SIZES (TOP + BOTTOM SECTIONS)
+───────────────────────────────────────── */
+
+/* Shared layout for both sections */
+.dashboard-cards-row,
+.weather-feedback-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    align-items: stretch;
+}
+
+/* Make ALL cards same height */
+.dashboard-card,
+.weather-info-card,
+.feedback-info-card {
+    min-height: 480px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+/* Shared card body spacing */
+.dashboard-card .card-content,
+.weather-info-card .weather-data,
+.feedback-info-card .feedback-content {
+    flex: 1;
+}
+
+/* Real-Time Flood Data Card */
+.flood-data-card {
+    background: rgba(255,255,255,0.96);
+    padding: 28px;
+    justify-content: space-between;
+}
+
+/* Announcement Card */
+.announcements-card {
+    background: rgba(255,255,255,0.96);
+    padding: 28px;
+}
+
+/* Weather Card */
+.weather-info-card {
+    padding: 28px;
+    background: white;
+    color: black;
+}
+
+/* Feedback Card */
+.feedback-info-card {
+    padding: 28px;
+    background: rgba(255,255,255,0.96);
+}
+
+/* Make announcement area scrollable */
+.announcements-card .card-content {
+    flex: 1;
+    overflow-y: auto;
+    max-height: 100%;
+    padding-right: 4px;
+}
+
+/* Make weather card content aligned */
+.weather-data {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 14px;
+}
+
+/* Feedback content centered */
+.feedback-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    flex: 1;
+}
+
+/* Sensor cards spacing */
+.flood-data-card .data-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    flex: 1;
+}
+
+/* Link always bottom */
+.flood-data-card .card-link {
+    margin-top: auto;
+    padding-top: 18px;
+    border-top: 1px solid rgba(0,0,0,0.08);
+    font-weight: 600;
+}
+
+/* Better visual balance */
+.card-header {
+    margin-bottom: 20px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .dashboard-cards-row,
+    .weather-feedback-section {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-card,
+    .weather-info-card,
+    .feedback-info-card {
+        min-height: auto;
+    }
+}
+.data-value.status-online {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.data-value.status-offline {
+    background: #fee2e2;
+    color: #dc2626;
 }
 
     </style>

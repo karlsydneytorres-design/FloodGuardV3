@@ -296,44 +296,44 @@
         <section class="dashboard-section">
             <div class="dashboard-cards-row">
         
-                <!-- Real-Time Flood Data -->
-                <div class="dashboard-card flood-data-card">
-                    <div class="card-header">
-                        <span class="card-icon">📊</span>
-                        <h3 class="card-title">Real-Time Flood Data</h3>
-                    </div>
-                    <div class="card-content data-grid">
-                        <div class="data-item">
-                            <span class="data-icon">🌊</span>
-                            <div class="data-info">
-                                <span class="data-label">Current Water Level</span>
-                                <span class="data-value">2.1m</span>
+               <!-- Real-Time Flood Data -->
+                        <div class="dashboard-card flood-data-card">
+                            <div class="card-header">
+                                <span class="card-icon">📊</span>
+                                <h3 class="card-title">Real-Time Flood Data</h3>
                             </div>
-                        </div>
-                        <div class="data-item">
-                            <span class="data-icon">🌧️</span>
-                            <div class="data-info">
-                                <span class="data-label">Hourly Rainfall</span>
-                                <span class="data-value">0.5mm/hr</span>
+                            <div class="card-content data-grid">
+
+                                <!-- Sulipan -->
+                                <div class="data-item">
+                                    <span class="data-icon">📡</span>
+                                    <div class="data-info">
+                                        <span class="data-label">Sulipan (WLM-001)</span>
+                                        <span class="data-value status-offline" id="status_sulipan_WLM-001">Offline</span>
+                                    </div>
+                                </div>
+
+                                <!-- Paligui -->
+                                <div class="data-item">
+                                    <span class="data-icon">📡</span>
+                                    <div class="data-info">
+                                        <span class="data-label">Paligui (WLM-002)</span>
+                                        <span class="data-value status-offline" id="status_paligui_WLM-002">Offline</span>
+                                    </div>
+                                </div>
+
+                                <!-- San Vicente -->
+                                <div class="data-item">
+                                    <span class="data-icon">📡</span>
+                                    <div class="data-info">
+                                        <span class="data-label">San Vicente (WLM-003)</span>
+                                        <span class="data-value status-offline" id="status_san_vicente_WLM-003">Offline</span>
+                                    </div>
+                                </div>
+
                             </div>
+                            <a href="./monitoring.html" class="card-link">View Detailed Monitoring →</a>
                         </div>
-                        <div class="data-item">
-                            <span class="data-icon">📡</span>
-                            <div class="data-info">
-                                <span class="data-label">Sensor Status</span>
-                                <span class="data-value status-online">Online</span>
-                            </div>
-                        </div>
-                        <div class="data-item">
-                            <span class="data-icon">☀️</span>
-                            <div class="data-info">
-                                <span class="data-label">Power Status</span>
-                                <span class="data-value status-online">98% Solar</span>
-                            </div>
-                        </div>
-                    </div>
-                    <a href="./monitoring.html" class="card-link">View Detailed Monitoring →</a>
-                </div>
         
                 <!-- Public Announcements -->
                 <div class="dashboard-card announcements-card">
@@ -412,15 +412,9 @@
                         </div>
 
                         <div class="feature-item">
-                            <span class="feature-icon">🗺️</span>
-                            <h4 class="feature-title">Evacuation Routes</h4>
-                            <p class="feature-description">Clear, updated evacuation maps and safe zone locations throughout Sulipan, San Vicente, Paligui in Apalit Pampanga</p>
-                        </div>
-
-                        <div class="feature-item">
                             <span class="feature-icon">🤝</span>
                             <h4 class="feature-title">Community Network</h4>
-                            <p class="feature-description">Connected barangay officials, emergency responders, and community volunteers</p>
+                            <p class="feature-description">Connected barangay officials</p>
                         </div>
                     </div>
                 </div>
@@ -567,7 +561,8 @@
             import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
             import {
                 collection, addDoc, serverTimestamp,
-                query, orderBy, limit, onSnapshot, where
+                query, orderBy, limit, onSnapshot, where,
+                doc
             } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
         
             // ── Auth guard — runs before anything else ──────────────────
@@ -575,35 +570,35 @@
             let appInitialized = false;
         
             onAuthStateChanged(auth, (user) => {
-            document.documentElement.style.visibility = "visible";
-
-            if (!user) {
-                window.location.replace('/auth/auth.html');
-                return;
-            }
-
-            if (appInitialized) return;
-            appInitialized = true;
-
-            currentUser = user;
-
-            // ── Update avatar & welcome name ─────────────────────────
-            const firstName = (user.displayName || user.email || 'User').split(/[\s@]/)[0];
-
-            const navAvatar = document.getElementById('navAvatar');
-            if (navAvatar) navAvatar.textContent = firstName.charAt(0).toUpperCase();
-
-            const dropdownAvatar = document.getElementById('dropdownAvatar');
-            if (dropdownAvatar) dropdownAvatar.textContent = firstName.charAt(0).toUpperCase();
-
-            const welcomeEl = document.querySelector('.dropdown-header span');
-            if (welcomeEl) welcomeEl.innerHTML = `Welcome <br> ${firstName}`;
-
-            initAnnouncements();
-        });
+                document.documentElement.style.visibility = "visible";
         
-            // ── Override logout to also call Firebase signOut directly ──
-            // This avoids the dynamic import race condition
+                if (!user) {
+                    window.location.replace('/auth/auth.html');
+                    return;
+                }
+        
+                if (appInitialized) return;
+                appInitialized = true;
+        
+                currentUser = user;
+        
+                // ── Update avatar & welcome name ─────────────────────────
+                const firstName = (user.displayName || user.email || 'User').split(/[\s@]/)[0];
+        
+                const navAvatar = document.getElementById('navAvatar');
+                if (navAvatar) navAvatar.textContent = firstName.charAt(0).toUpperCase();
+        
+                const dropdownAvatar = document.getElementById('dropdownAvatar');
+                if (dropdownAvatar) dropdownAvatar.textContent = firstName.charAt(0).toUpperCase();
+        
+                const welcomeEl = document.querySelector('.dropdown-header span');
+                if (welcomeEl) welcomeEl.innerHTML = `Welcome <br> ${firstName}`;
+        
+                initAnnouncements();
+                initLiveSensorData(); // ← syncs sensor status from monitoring page
+            });
+        
+            // ── Override logout ─────────────────────────────────────────
             window.logout = async function () {
                 if (confirm('Are you sure you want to logout from FloodGuard?')) {
                     document.body.style.transition = 'opacity 0.5s ease';
@@ -618,6 +613,36 @@
                 }
             };
         
+            function initLiveSensorData() {
+    const SENSORS = [
+        { docId: "sulipan_WLM-001",     elementId: "status_sulipan_WLM-001"     },
+        { docId: "paligui_WLM-002",     elementId: "status_paligui_WLM-002"     },
+        { docId: "san_vicente_WLM-003", elementId: "status_san_vicente_WLM-003" }
+    ];
+
+    SENSORS.forEach(({ docId, elementId }) => {
+        const sensorRef = doc(db, "sensor_toggles", docId);
+
+        onSnapshot(sensorRef,
+            (snap) => {
+                const enabled  = snap.exists() ? snap.data().enabled : false;
+                const statusEl = document.getElementById(elementId);
+                if (!statusEl) return;
+
+                statusEl.textContent = enabled ? 'Online' : 'Offline';
+                statusEl.className   = `data-value ${enabled ? 'status-online' : 'status-offline'}`;
+            },
+            (error) => {
+                console.error(`Sensor listener error [${docId}]:`, error);
+                const statusEl = document.getElementById(elementId);
+                if (statusEl) {
+                    statusEl.textContent = 'Offline';
+                    statusEl.className   = 'data-value status-offline';
+                }
+            }
+        );
+    });
+}
             // ── Announcements ───────────────────────────────────────────
             function renderAnnouncements(docs) {
                 const container = document.getElementById('announcementsContainer');
@@ -721,7 +746,7 @@
                 }
             };
         </script>
-       
+        
         <script src="./js/index.js"></script>
     </body>
     </html>

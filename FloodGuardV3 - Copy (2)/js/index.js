@@ -317,20 +317,20 @@ window.logout = async function () {
 };
 
     // ── Flood data simulation ─────────────────────────────────────
-    function updateFloodData() {
-        const waterLevel = document.querySelector('.data-value');
-        if (waterLevel) {
-            const currentLevel = parseFloat(waterLevel.textContent);
-            const newLevel     = (currentLevel + (Math.random() - 0.5) * 0.1).toFixed(1);
-            waterLevel.textContent = newLevel + 'm';
-        }
-        const rainfallElements = document.querySelectorAll('.data-value');
-        if (rainfallElements[1]) {
-            rainfallElements[1].textContent = (Math.random() * 2).toFixed(1) + 'mm/hr';
-        }
-    }
+    //function updateFloodData() {
+        //const waterLevel = document.querySelector('.data-value');
+        //if (waterLevel) {
+           // const currentLevel = parseFloat(waterLevel.textContent);
+            //const newLevel     = (currentLevel + (Math.random() - 0.5) * 0.1).toFixed(1);
+            //waterLevel.textContent = newLevel + 'm';
+        //}
+        //const rainfallElements = document.querySelectorAll('.data-value');
+        //if (rainfallElements[1]) {
+            //rainfallElements[1].textContent = (Math.random() * 2).toFixed(1) + 'mm/hr';
+        //}
+    //}
 
-    setInterval(updateFloodData, 30000);
+    // setInterval(updateFloodData, 30000);
 
     // ── Toggle mobile menu ────────────────────────────────────────
     function toggleMenu() {

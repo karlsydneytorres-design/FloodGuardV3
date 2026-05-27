@@ -9,6 +9,28 @@
     <script>document.documentElement.style.visibility = "hidden";</script>
 
     <link rel="stylesheet" href="../css/styleshet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-wrapper input {
+            width: 100%;
+            padding-right: 45px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            color: #666;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -19,37 +41,59 @@
         <div class="form-container">
             <form class="form active" id="login-form">
                 <h2 class="form-title">Welcome Back</h2>
+
                 <div class="form-group">
                     <label for="login-email">Email Address</label>
                     <input type="email" id="login-email" name="email" required>
                 </div>
+
                 <div class="form-group">
                     <label for="login-password">Password</label>
-                    <input type="password" id="login-password" name="password" required>
+
+                    <div class="password-wrapper">
+                        <input type="password" id="login-password" name="password" required>
+                        <i class="fa-solid fa-eye toggle-password" toggle="#login-password"></i>
+                    </div>
                 </div>
+
                 <div id="login-error" style="display:none; color:red; font-size:0.9rem;"></div>
+
                 <button type="submit" class="submit-btn">Sign In</button>
             </form>
 
             <form class="form" id="signup-form">
                 <h2 class="form-title">Create Account</h2>
+
                 <div class="form-group">
                     <label for="signup-name">Full Name</label>
                     <input type="text" id="signup-name" name="name" required>
                 </div>
+
                 <div class="form-group">
                     <label for="signup-email">Email Address</label>
                     <input type="email" id="signup-email" name="email" required>
                 </div>
+
                 <div class="form-group">
                     <label for="signup-password">Password</label>
-                    <input type="password" id="signup-password" name="password" required>
+
+                    <div class="password-wrapper">
+                        <input type="password" id="signup-password" name="password" required>
+                        <i class="fa-solid fa-eye toggle-password" toggle="#signup-password"></i>
+                    </div>
                 </div>
+
                 <div class="form-group">
                     <label for="confirmPassword">Confirm Password</label>
-                    <input type="password" id="confirmPassword" name="confirmPassword" required>
+
+                    <div class="password-wrapper">
+                        <input type="password" id="confirmPassword" name="confirmPassword" required>
+                        <i class="fa-solid fa-eye toggle-password" toggle="#confirmPassword"></i>
+                    </div>
                 </div>
+
                 <div id="signup-error" style="display:none; color:red; font-size:0.9rem;"></div>
+
                 <button type="submit" class="submit-btn">Create Account</button>
             </form>
         </div>
@@ -66,10 +110,13 @@
                 <h2 class="modal-title">🛡️ FloodWatch Terms & Conditions</h2>
                 <p class="modal-subtitle">Please review and accept our terms to continue</p>
             </div>
+
             <div class="modal-body">
                 <div class="terms-content">
                     <h3>🌊 Service Overview</h3>
-                    <p>FloodWatch provides flood monitoring, prediction, and protection services designed to help communities and individuals prepare for and respond to flood events.</p>
+                    <p>
+                        FloodWatch provides flood monitoring, prediction, and protection services designed to help communities and individuals prepare for and respond to flood events.
+                    </p>
 
                     <h3>📊 Data Usage & Privacy</h3>
                     <ul>
@@ -80,7 +127,10 @@
                     </ul>
 
                     <h3>⚠️ Service Limitations</h3>
-                    <p>While FloodWatch strives for accuracy, our predictions are based on available data and models. Users should:</p>
+                    <p>
+                        While FloodWatch strives for accuracy, our predictions are based on available data and models. Users should:
+                    </p>
+
                     <ul>
                         <li>Always follow official emergency guidance from local authorities</li>
                         <li>Use FloodWatch as a supplementary tool, not the sole source of information</li>
@@ -88,7 +138,9 @@
                     </ul>
 
                     <h3>🔄 Service Availability</h3>
-                    <p>We aim for 99.9% uptime but cannot guarantee uninterrupted service. Critical alerts will be delivered through multiple channels when possible.</p>
+                    <p>
+                        We aim for 99.9% uptime but cannot guarantee uninterrupted service. Critical alerts will be delivered through multiple channels when possible.
+                    </p>
 
                     <h3>📱 User Responsibilities</h3>
                     <ul>
@@ -99,20 +151,49 @@
                     </ul>
 
                     <h3>🛡️ Limitation of Liability</h3>
-                    <p>FloodWatch provides information services and cannot be held liable for damages resulting from flood events. Users assume responsibility for their safety and property protection decisions.</p>
+                    <p>
+                        FloodWatch provides information services and cannot be held liable for damages resulting from flood events. Users assume responsibility for their safety and property protection decisions.
+                    </p>
                 </div>
 
                 <div class="checkbox-group">
                     <input type="checkbox" id="acceptTerms">
-                    <label for="acceptTerms">I have read and agree to the Terms and Conditions, Privacy Policy, and understand the service limitations of FloodWatch.</label>
+
+                    <label for="acceptTerms">
+                        I have read and agree to the Terms and Conditions, Privacy Policy, and understand the service limitations of FloodWatch.
+                    </label>
                 </div>
             </div>
+
             <div class="modal-footer">
-                <button type="button" class="modal-btn modal-btn-cancel" id="cancelTerms">Cancel</button>
-                <button type="button" class="modal-btn modal-btn-accept" id="acceptTermsBtn" disabled>Accept & Continue</button>
+                <button type="button" class="modal-btn modal-btn-cancel" id="cancelTerms">
+                    Cancel
+                </button>
+
+                <button type="button" class="modal-btn modal-btn-accept" id="acceptTermsBtn" disabled>
+                    Accept & Continue
+                </button>
             </div>
         </div>
     </div>
+
+    <script>
+        document.querySelectorAll(".toggle-password").forEach(icon => {
+            icon.addEventListener("click", () => {
+                const input = document.querySelector(icon.getAttribute("toggle"));
+
+                if (input.type === "password") {
+                    input.type = "text";
+                    icon.classList.remove("fa-eye");
+                    icon.classList.add("fa-eye-slash");
+                } else {
+                    input.type = "password";
+                    icon.classList.remove("fa-eye-slash");
+                    icon.classList.add("fa-eye");
+                }
+            });
+        });
+    </script>
 
     <script type="module" src="/js/auth.js"></script>
 </body>

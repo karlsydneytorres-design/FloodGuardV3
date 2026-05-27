@@ -2,6 +2,13 @@
  const profileDropdown = document.querySelector('.profile-dropdown-container');
  const dropdownMenu = document.querySelector('.profile-dropdown-menu');
 
+ function toggleMenu() {
+     const navMenu = document.getElementById('navMenu');
+     if (navMenu) {
+         navMenu.classList.toggle('active');
+     }
+ }
+
  if (profileDropdown && dropdownMenu) {
      profileDropdown.addEventListener('click', (event) => {
          event.stopPropagation();
@@ -13,6 +20,11 @@
              if (dropdownMenu.classList.contains('show')) {
                  dropdownMenu.classList.remove('show');
              }
+         }
+
+         const navMenu = document.getElementById('navMenu');
+         if (navMenu && !event.target.closest('#navMenu') && !event.target.closest('.hamburger')) {
+             navMenu.classList.remove('active');
          }
      }
  }

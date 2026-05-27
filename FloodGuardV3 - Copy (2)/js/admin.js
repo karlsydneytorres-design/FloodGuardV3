@@ -8,7 +8,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
-import { auth, db } from "/js/firebase-config.js";
+import { auth, db } from "./firebase-config.js";
 import { getUserProfile } from "/js/profile-utils.js";
 
 // ─── Track the active Firestore listeners so we can kill them ─

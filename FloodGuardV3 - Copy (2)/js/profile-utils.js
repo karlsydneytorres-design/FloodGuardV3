@@ -3,7 +3,7 @@
 // ============================================================
 
 import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
-import { db } from "/js/firebase-config.js";
+import { db } from "./firebase-config.js";
 
 export async function getUserProfile(uid) {
   const docSnap = await getDoc(doc(db, "users", uid));

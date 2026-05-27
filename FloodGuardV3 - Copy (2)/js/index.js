@@ -305,7 +305,7 @@
         if (confirm('Are you sure you want to logout from FloodGuard?')) {
             document.body.style.transition = 'opacity 0.5s ease';
             document.body.style.opacity    = '0';
-            const { logOut } = await import('./auth.js');
+            const { logOut } = await import('./js/auth.js');
             await logOut();
         }
     }
@@ -328,7 +328,10 @@
 
     // ── Toggle mobile menu ────────────────────────────────────────
     function toggleMenu() {
-        document.getElementById("navMenu").classList.toggle("active");
+        const navMenu = document.getElementById("navMenu");
+        if (navMenu) {
+            navMenu.classList.toggle("active");
+        }
     }
 
     // ── DOMContentLoaded — single unified event hub ───────────────
@@ -378,12 +381,19 @@
             });
         }
 
-        // ── Single document click: closes dropdown AND modal backdrop
+        // ── Single document click: closes dropdown, mobile nav, and modal backdrop
         document.addEventListener('click', (e) => {
             // Close dropdown
-            if (dropdownMenu && profileDropdown && !profileDropdown.contains(e.target)) {
-                dropdownMenu.classList.remove('active');
+            if (dropdownMenu && profileDropdown && !profileDropdown.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                dropdownMenu.classList.remove('show');
             }
+
+            // Close mobile nav when tapping outside
+            const navMenu = document.getElementById('navMenu');
+            if (navMenu && !navMenu.contains(e.target) && !e.target.closest('.hamburger')) {
+                navMenu.classList.remove('active');
+            }
+
             // Close modal on backdrop click
             const modal = document.getElementById('ratingModal');
             if (modal && e.target === modal) {

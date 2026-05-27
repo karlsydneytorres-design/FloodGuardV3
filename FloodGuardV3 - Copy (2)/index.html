@@ -577,21 +577,27 @@
             let appInitialized = false;
         
             onAuthStateChanged(auth, (user) => {
-                // Always reveal the page
-                document.documentElement.style.visibility = "visible";
-        
-                if (!user) {
-                    // Signed out — go to auth
-                    window.location.replace('/auth/auth.html');
-                    return;
-                }
-        
-                if (appInitialized) return;
-                appInitialized = true;
-        
-                currentUser = user;
-                initAnnouncements();
-            });
+            document.documentElement.style.visibility = "visible";
+
+            if (!user) {
+                window.location.replace('/auth/auth.html');
+                return;
+            }
+
+            if (appInitialized) return;
+            appInitialized = true;
+
+            currentUser = user;
+
+            // ── Update welcome name ──────────────────────────────────
+            const welcomeEl = document.querySelector('.dropdown-header span');
+            if (welcomeEl) {
+                const name = user.displayName || user.email || 'User';
+                welcomeEl.innerHTML = `Welcome <br> ${name}`;
+            }
+
+            initAnnouncements();
+        });
         
             // ── Override logout to also call Firebase signOut directly ──
             // This avoids the dynamic import race condition

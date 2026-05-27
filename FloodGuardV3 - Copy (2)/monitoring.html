@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FloodWatch - Advanced Monitoring System</title>
+    <script>document.documentElement.style.visibility = "hidden";</script>
     <link rel="stylesheet" href="./css/stylesheet.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -247,45 +248,68 @@
     <!-- Load monitoring module (ES module so Firebase imports work) -->
     <script type="module" src="./js/monitoring.js"></script>
 
-    <script>
-
-        document.addEventListener('DOMContentLoaded', () => {
-        
-            // Elements
-            const profileToggle = document.querySelector('.profile-link-toggle');
-            const dropdownMenu = document.querySelector('.profile-dropdown-menu');
-            const chevron = document.querySelector('.profile-chevron');
-        
-            // Check if elements exist
-            if (!profileToggle || !dropdownMenu) {
-                console.warn('Dropdown elements not found');
+    <script type="module">
+        import { auth } from "./js/firebase-config.js";
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+    
+        // ── Auth guard ──────────────────────────────────────────────
+        onAuthStateChanged(auth, (user) => {
+            document.documentElement.style.visibility = "visible";
+    
+            if (!user) {
+                window.location.replace('/auth/auth.html');
                 return;
             }
-        
-            // Toggle dropdown
+    
+            // ── Update welcome name ─────────────────────────────────
+            const welcomeEl = document.querySelector('.dropdown-header span');
+            if (welcomeEl) {
+                const name = user.displayName || user.email || 'User';
+                welcomeEl.innerHTML = `Welcome <br> ${name}`;
+            }
+        });
+    
+        // ── Logout ──────────────────────────────────────────────────
+        window.logout = async function () {
+            if (confirm('Are you sure you want to logout from FloodGuard?')) {
+                document.body.style.transition = 'opacity 0.5s ease';
+                document.body.style.opacity    = '0';
+                try {
+                    await signOut(auth);
+                    window.location.replace('/auth/auth.html');
+                } catch (err) {
+                    console.error('Logout error:', err);
+                    window.location.replace('/auth/auth.html');
+                }
+            }
+        };
+    </script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const profileToggle = document.querySelector('.profile-link-toggle');
+            const dropdownMenu  = document.querySelector('.profile-dropdown-menu');
+            const chevron       = document.querySelector('.profile-chevron');
+    
+            if (!profileToggle || !dropdownMenu) return;
+    
             profileToggle.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-        
                 dropdownMenu.classList.toggle('show');
-        
-                // Rotate chevron
                 chevron.classList.toggle('rotate');
             });
-        
-            // Prevent dropdown from closing when clicking inside
+    
             dropdownMenu.addEventListener('click', (e) => {
                 e.stopPropagation();
             });
-        
-            // Close dropdown when clicking outside
+    
             document.addEventListener('click', () => {
                 dropdownMenu.classList.remove('show');
                 chevron.classList.remove('rotate');
             });
-        
         });
-        
-        </script>
+    </script>
+
 </body>
 </html>

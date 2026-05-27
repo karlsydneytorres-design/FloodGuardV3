@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FloodWatch - Edit Profile</title>
+    <script>document.documentElement.style.visibility = "hidden";</script>
     <link rel="stylesheet" href="./css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -83,6 +84,48 @@
             opacity: 0.9;
             font-size: 0.9em;
         }
+        /* Avatar circle */
+.profile-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #1e40af);
+    color: white;
+    font-size: 2.5rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    text-transform: uppercase;
+    box-shadow: 0 4px 14px rgba(59,130,246,0.4);
+}
+
+/* Password wrapper */
+.password-wrapper {
+    position: relative;
+}
+
+.password-wrapper input {
+    padding-right: 40px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #6b7280;
+    font-size: 1rem;
+    padding: 0;
+}
+
+.toggle-password:hover { color: #3b82f6; }
     </style>
 </head>
 <body>
@@ -125,7 +168,7 @@
         <div class="page-header">
             <h1 class="page-title">✏️ Edit Your Profile</h1>
             <p class="page-subtitle">Update your personal information and preferences</p>
-            <p class="page-subtitle">(Only for Brangay Colgante Community and Admin.)</p>
+            <p class="page-subtitle">(Only for Apalit Community and User.)</p>
         </div>
 
         <hr class="page-separator">
@@ -137,20 +180,16 @@
 
         <!-- Profile Container -->
         <div class="profile-container">
-            <!-- Profile Card -->
-            <div class="profile-card">
-                <div class="profile-photo-container">
-                    <img src="design/images/profile.png" alt="Profile Photo" class="profile-photo" id="profileImage">
-                    <button class="photo-upload-btn" onclick="uploadPhoto()" title="Change Photo">📷</button>
-                    <input type="file" id="photoInput" accept="image/*" style="display: none;" onchange="previewPhoto(this)">
+                <!-- Profile Card -->
+                <div class="profile-card">
+                    <div class="profile-avatar" id="profileAvatar">U</div>
+                    <h2 class="profile-name" id="displayName">User</h2>
+                    <div class="profile-role" id="profileRole">User</div>
+                    <div class="profile-status">
+                        <div class="status-indicator"></div>
+                        Online
+                    </div>
                 </div>
-                <h2 class="profile-name" id="displayName">Ernest Lazatin</h2>
-                <div class="profile-role">Administrator</div>
-                <div class="profile-status">
-                    <div class="status-indicator"></div>
-                    Online
-                </div>
-            </div>
 
             <!-- Edit Form -->
             <div class="edit-form-container">
@@ -161,166 +200,104 @@
 
                 <hr class="section-separator">
 
-                <form id="profileForm" onsubmit="return saveProfile(event)">
-                    <!-- Personal Information Section -->
-                    <div class="form-section">
-                        <h3 class="section-title">
-                            <span class="section-icon">👤</span>
-                            Personal Information
-                        </h3>
-                        <hr class="section-separator">
-                        <div class="form-grid">
-                            <div class="form-group full-width">
-                                <label for="fullName">Full Name *</label>
-                                <input type="text" id="fullName" name="fullName" value="" required>
+                    <form id="profileForm" onsubmit="return saveProfile(event)">
+
+                        <!-- Personal Information -->
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <span class="section-icon">👤</span>
+                                Personal Information
+                            </h3>
+                            <hr class="section-separator">
+                            <div class="form-grid">
+                                <div class="form-group full-width">
+                                    <label for="fullName">Full Name *</label>
+                                    <input type="text" id="fullName" name="fullName" required>
+                                </div>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Contact Information Section -->
-                    <div class="form-section">
-                        <h3 class="section-title">
-                            <span class="section-icon">📞</span>
-                            Contact Information
-                        </h3>
-                        <hr class="section-separator">
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label for="email">Email Address *</label>
-                                <input type="email" id="email" name="email" value="" required readonly style="background-color: #f0f0f0; cursor: not-allowed;">
-                            </div>
-                            <div class="form-group">
-                                <label for="phone">Phone Number *</label>
-                                <input type="tel" id="phone" name="phone" value="+63 917 123 4567" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="alternatePhone">Alternate Phone</label>
-                                <input type="tel" id="alternatePhone" name="alternatePhone" value="+63 945 678 9012">
-                            </div>
-                            <div class="form-group">
-                                <label for="emergencyContact">Emergency Contact</label>
-                                <input type="tel" id="emergencyContact" name="emergencyContact" value="+63 912 345 6789">
+                    
+                        <!-- Contact Information -->
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <span class="section-icon">📞</span>
+                                Contact Information
+                            </h3>
+                            <hr class="section-separator">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="email">Email Address</label>
+                                    <input type="email" id="email" name="email" readonly
+                                        style="background-color:#f0f0f0;cursor:not-allowed;">
+                                </div>
+                                <div class="form-group">
+                                    <label for="phone">Phone Number</label>
+                                    <input type="tel" id="phone" name="phone" placeholder="+63 9XX XXX XXXX">
+                                </div>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Security Section -->
-                    <div class="form-section">
-                        <div class="security-section">
-                            <div class="security-header">
-                                <span class="security-icon">🔐</span>
-                                <h3 class="security-title">Password & Security</h3>
+                    
+                        <!-- Password & Security -->
+                        <div class="form-section">
+                            <div class="security-section">
+                                <div class="security-header">
+                                    <span class="security-icon">🔐</span>
+                                    <h3 class="security-title">Password & Security</h3>
+                                </div>
+                                <p class="security-description">
+                                    Keep your account secure by updating your password regularly.
+                                </p>
                             </div>
-                            <p class="security-description">
-                                Keep your account secure by updating your password and security settings regularly.
-                            </p>
+                            <hr class="section-separator">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="currentPassword">Current Password</label>
+                                    <div class="password-wrapper">
+                                        <input type="password" id="currentPassword" name="currentPassword"
+                                            placeholder="Enter current password">
+                                        <button type="button" class="toggle-password" onclick="togglePass('currentPassword', this)">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="newPassword">New Password</label>
+                                    <div class="password-wrapper">
+                                        <input type="password" id="newPassword" name="newPassword"
+                                            placeholder="Enter new password">
+                                        <button type="button" class="toggle-password" onclick="togglePass('newPassword', this)">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="confirmPassword">Confirm New Password</label>
+                                    <div class="password-wrapper">
+                                        <input type="password" id="confirmPassword" name="confirmPassword"
+                                            placeholder="Confirm new password">
+                                        <button type="button" class="toggle-password" onclick="togglePass('confirmPassword', this)">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                    
+                        <hr class="page-separator">
+                    
+                        <!-- Form Actions -->
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-danger" onclick="resetForm()">
+                                🔄 Reset
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="changePassword()">
+                                🔒 Change Password
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                💾 Save Changes
+                            </button>
                         </div>
-                        <hr class="section-separator">
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label for="currentPassword">Current Password</label>
-                                <input type="password" id="currentPassword" name="currentPassword" placeholder="Enter current password">
-                            </div>
-                            <div class="form-group">
-                                <label for="newPassword">New Password</label>
-                                <input type="password" id="newPassword" name="newPassword" placeholder="Enter new password">
-                            </div>
-                            <div class="form-group">
-                                <label for="confirmPassword">Confirm New Password</label>
-                                <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm new password">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Notification Preferences Section -->
-                    <div class="form-section">
-                        <h3 class="section-title">
-                            <span class="section-icon">🔔</span>
-                            Notification Preferences
-                        </h3>
-                        <hr class="section-separator">
-                        <div class="notification-grid">
-                            <div class="notification-item">
-                                <div class="notification-label">
-                                    <div class="notification-title">Flood Alerts</div>
-                                    <div class="notification-desc">Critical flood warnings and updates</div>
-                                </div>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" checked>
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                            <div class="notification-item">
-                                <div class="notification-label">
-                                    <div class="notification-title">Weather Updates</div>
-                                    <div class="notification-desc">Daily weather forecasts and warnings</div>
-                                </div>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" checked>
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                            <div class="notification-item">
-                                <div class="notification-label">
-                                    <div class="notification-title">Community Announcements</div>
-                                    <div class="notification-desc">Barangay news and announcements</div>
-                                </div>
-                                <label class="toggle-switch">
-                                    <input type="checkbox">
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                            <div class="notification-item">
-                                <div class="notification-label">
-                                    <div class="notification-title">System Maintenance</div>
-                                    <div class="notification-desc">FloodWatch system updates</div>
-                                </div>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" checked>
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                            <div class="notification-item">
-                                <div class="notification-label">
-                                    <div class="notification-title">SMS Alerts</div>
-                                    <div class="notification-desc">Text message notifications</div>
-                                </div>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" checked>
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                            <div class="notification-item">
-                                <div class="notification-label">
-                                    <div class="notification-title">Email Notifications</div>
-                                    <div class="notification-desc">Email updates and reports</div>
-                                </div>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" checked>
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <hr class="page-separator">
-
-                    <!-- Form Actions -->
-                    <div class="form-actions">
-                        <a href="profile.html" class="btn btn-secondary">
-                            ❌ Cancel
-                        </a>
-                        <button type="button" class="btn btn-danger" onclick="resetForm()">
-                            🔄 Reset
-                        </button>
-                        <button type="button" class="btn btn-secondary" onclick="changePassword()">
-                            🔒 Change Password
-                        </button>
-                        <button type="submit" class="btn btn-primary">
-                            💾 Save Changes
-                        </button>
-                    </div>
-                </form>
+                    
+                    </form>
             </div>
         </div>
     </main>

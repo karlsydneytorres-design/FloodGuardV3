@@ -89,7 +89,10 @@
                 <img src="design/images/logo.png" alt="FloodGuard Logo" class="logo-image">
                 FloodWatch
             </div>
-            <ul class="nav-menu">
+            <button class="hamburger" aria-label="Toggle navigation" onclick="toggleMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <ul id="navMenu" class="nav-menu">
                 <li class="profile-dropdown-container">
                     <a href="#" class="nav-link profile-link-toggle">
                         <img src="design/images/profile.png" alt="Profile" class="nav-profile-photo">
@@ -242,7 +245,7 @@
     </footer>
 
     <!-- Load monitoring module (ES module so Firebase imports work) -->
-    <script type="module" src="./scripts/monitoring.js"></script>
+    <script type="module" src="./js/monitoring.js"></script>
 
     <script>
 
